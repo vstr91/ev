@@ -5,16 +5,31 @@
  */
 package model;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+
 /**
  *
  * @author Almir
  */
+@Entity
+@Table(name="produto")
 public class Produto {
     
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private int id;
     private String nome;
-    private TipoUnidade tipoUnidade;
+    //private TipoUnidade tipoUnidade;
     private Integer doses;
     private String observacao;
+
+    public Produto() {
+    }
 
     public String getNome() {
         return nome;
@@ -24,13 +39,13 @@ public class Produto {
         this.nome = nome;
     }
 
-    public TipoUnidade getTipoUnidade() {
-        return tipoUnidade;
-    }
-
-    public void setTipoUnidade(TipoUnidade tipoUnidade) {
-        this.tipoUnidade = tipoUnidade;
-    }
+//    public TipoUnidade getTipoUnidade() {
+//        return tipoUnidade;
+//    }
+//
+//    public void setTipoUnidade(TipoUnidade tipoUnidade) {
+//        this.tipoUnidade = tipoUnidade;
+//    }
 
     public Integer getDoses() {
         return doses;

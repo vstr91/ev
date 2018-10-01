@@ -138,7 +138,9 @@ public class MainView extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        // TODO add your handling code here:
+        ProdutoView produtoView = new ProdutoView();
+        produtoView.setLocationRelativeTo(this);
+        produtoView.setVisible(true);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     /**
