@@ -9,7 +9,7 @@ package view;
  *
  * @author Cefet
  */
-public class CaixaView extends javax.swing.JFrame {
+public class CaixaView extends javax.swing.JDialog {
 
     /**
      * Creates new form BarView
@@ -50,7 +50,7 @@ public class CaixaView extends javax.swing.JFrame {
         labelTotalVendas = new javax.swing.JLabel();
         btnCadastrar = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 

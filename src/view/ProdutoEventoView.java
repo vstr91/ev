@@ -8,12 +8,14 @@ package view;
 /**
  *
  */
-public class MainView extends javax.swing.JFrame {
+public class ProdutoEventoView extends javax.swing.JDialog {
 
+    boolean returnToParent = false;
+    
     /**
-     * Creates new form MainView
+     * Creates new form ProdutoEventoView
      */
-    public MainView() {
+    public ProdutoEventoView() {
         initComponents();
     }
 
@@ -28,23 +30,19 @@ public class MainView extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tableEventos = new javax.swing.JTable();
-        jLabel1 = new javax.swing.JLabel();
-        btnNovoEvento = new javax.swing.JButton();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
-        jMenuItem2 = new javax.swing.JMenuItem();
-        jMenuItem3 = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
-        jMenuItem4 = new javax.swing.JMenuItem();
+        tableProdutos = new javax.swing.JTable();
+        btnNovoProduto = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(1024, 768));
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        tableEventos.setModel(new javax.swing.table.DefaultTableModel(
+        tableProdutos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -55,14 +53,12 @@ public class MainView extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(tableEventos);
+        jScrollPane1.setViewportView(tableProdutos);
 
-        jLabel1.setText("Eventos");
-
-        btnNovoEvento.setText("Novo Evento");
-        btnNovoEvento.addActionListener(new java.awt.event.ActionListener() {
+        btnNovoProduto.setText("Novo Produto");
+        btnNovoProduto.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnNovoEventoActionPerformed(evt);
+                btnNovoProdutoActionPerformed(evt);
             }
         });
 
@@ -71,56 +67,23 @@ public class MainView extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(167, 167, 167)
-                .addComponent(jLabel1)
-                .addContainerGap(170, Short.MAX_VALUE))
-            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 356, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(btnNovoEvento)))
+                        .addComponent(btnNovoProduto)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(13, 13, 13)
-                .addComponent(jLabel1)
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(btnNovoEvento)
+                .addComponent(btnNovoProduto)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        jMenu1.setText("Outras Opções");
-
-        jMenuItem1.setText("Gerenciar Produtos");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
-            }
-        });
-        jMenu1.add(jMenuItem1);
-
-        jMenuItem2.setText("Relatórios");
-        jMenu1.add(jMenuItem2);
-
-        jMenuItem3.setText("Exportar Backup");
-        jMenu1.add(jMenuItem3);
-
-        jMenuBar1.add(jMenu1);
-
-        jMenu2.setText("Sobre");
-
-        jMenuItem4.setText("Sobre o Sistema");
-        jMenu2.add(jMenuItem4);
-
-        jMenuBar1.add(jMenu2);
-
-        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -142,35 +105,32 @@ public class MainView extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+    private void btnNovoProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoProdutoActionPerformed
         ProdutoView produtoView = new ProdutoView();
         produtoView.setLocationRelativeTo(this);
         produtoView.setAlwaysOnTop(true);
         produtoView.setModal(true);
         produtoView.setVisible(true);
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
+    }//GEN-LAST:event_btnNovoProdutoActionPerformed
 
-    private void btnNovoEventoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoEventoActionPerformed
-        NovoEventoView novoEventoView = new NovoEventoView();
-        novoEventoView.setLocationRelativeTo(this);
-        novoEventoView.setAlwaysOnTop(true);
-        novoEventoView.setModal(true);
-        novoEventoView.setVisible(true);
-    }//GEN-LAST:event_btnNovoEventoActionPerformed
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        if(returnToParent){
+            FechamentoView fechamentoView = new FechamentoView();
+            fechamentoView.setLocationRelativeTo(this);
+            fechamentoView.setAlwaysOnTop(true);
+            fechamentoView.setModal(true);
+            fechamentoView.setVisible(true);
+        }
+    }//GEN-LAST:event_formWindowClosed
 
+    public void returnToParent(boolean val){
+        returnToParent = val;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnNovoEvento;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JButton btnNovoProduto;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable tableEventos;
+    private javax.swing.JTable tableProdutos;
     // End of variables declaration//GEN-END:variables
 }
