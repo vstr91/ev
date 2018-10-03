@@ -17,7 +17,7 @@ public class ConnectionFactory {
     public Connection getConnection() {
         try {
             return DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/ev?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "");
+                    "jdbc:derby://localhost:1527/ev", "root", "root");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

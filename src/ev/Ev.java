@@ -5,8 +5,14 @@
  */
 package ev;
 
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import model.UnidadeVenda;
+import model.dao.UnidadeVendaDAO;
 import view.MainView;
 
 /**
@@ -38,18 +44,7 @@ public class Ev {
         mainView.setLocationRelativeTo(null);
         mainView.setTitle("Gerenciador de Eventos");
         mainView.setVisible(true);
-
-//        Produto p = new Produto();
-//        p.setNome("teste");
-//        p.setDoses(12);
-//        p.setObservacao("Teste");
-//        
-//        ProdutoDAO produtoDAO = new ProdutoDAO();
-//        try {
-//            produtoDAO.salvar(p);
-//        } catch (SQLException ex) {
-//            Logger.getLogger(Ev.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+        
     }
 
 }

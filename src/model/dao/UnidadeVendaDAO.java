@@ -7,33 +7,39 @@ package model.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import model.Produto;
+import java.util.ArrayList;
+import java.util.List;
+import model.UnidadeVenda;
 
 /**
  *
  */
-public class ProdutoDAO {
+public class UnidadeVendaDAO {
 
-    public ProdutoDAO() {
+    public UnidadeVendaDAO() {
 
     }
 
-    public void salvar(Produto produto) throws SQLException {
+    public List<UnidadeVenda> listarTodos() throws SQLException {
 
-        String query = "INSERT INTO produto (nome, unidade_venda, doses, observacao) VALUES (?, ?, ?, ?)";
+        String query = "SELECT * FROM unidade_venda";
         PreparedStatement ps = null;
+        List<UnidadeVenda> unidades = new ArrayList<>();
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             ps = con.prepareStatement(query);
-            ps.setString(1, produto.getNome());
-            ps.setInt(2, produto.getTipoUnidade().getId());
-            ps.setInt(3, produto.getDoses());
-            ps.setString(4, produto.getObservacao());
-            ps.execute();
+            ResultSet rs = ps.executeQuery();
+            
+            while(rs.next()){
+                UnidadeVenda unidadeVenda = new UnidadeVenda();
+                unidadeVenda.setId(rs.getInt(1));
+                unidadeVenda.setNome(rs.getString(2));
+                unidades.add(unidadeVenda);
+            }
+            
             ps.close();
             
         } catch (SQLException e) {
@@ -44,6 +50,8 @@ public class ProdutoDAO {
             }
             
         }
+        
+        return unidades;
         
     }
 

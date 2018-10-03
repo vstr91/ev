@@ -5,21 +5,44 @@
  */
 package view;
 
+import ev.Ev;
+import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import model.Produto;
+import model.UnidadeVenda;
+import model.dao.ProdutoDAO;
+import model.dao.UnidadeVendaDAO;
 
 /**
  *
  */
 public class ProdutoView extends javax.swing.JDialog {
 
+    List<UnidadeVenda> unidades;
+    ProdutoDAO produtoDAO = null;
+    
     /**
      * Creates new form ProdutoView
      */
     public ProdutoView() {
         initComponents();
+        
+        UnidadeVendaDAO unidadeVendaDAO = new UnidadeVendaDAO();
+        try {
+            unidades = unidadeVendaDAO.listarTodos();
+            
+            for(UnidadeVenda un : unidades){
+                comboTipoUnidade.addItem(un.getNome());
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(Ev.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 
     /**
@@ -56,7 +79,6 @@ public class ProdutoView extends javax.swing.JDialog {
 
         jLabel3.setText("Tipo de Unidade");
 
-        comboTipoUnidade.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Unidade", "Lata", "Garrafa", "Dose" }));
         comboTipoUnidade.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comboTipoUnidadeActionPerformed(evt);
@@ -228,12 +250,31 @@ public class ProdutoView extends javax.swing.JDialog {
         } else if(spinnerDose.isEnabled() && (Integer) spinnerDose.getValue() < 1){
             JOptionPane.showMessageDialog(this, "Por Favor informe a quantidade de doses", "Dados não Informados", JOptionPane.ERROR_MESSAGE);
         } else{
-            //SALVA PRODUTO
+            salvar();
             JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso!", "Produto Cadastrado", JOptionPane.INFORMATION_MESSAGE);
             dispose();
         }
         
     }//GEN-LAST:event_btnSalvarEFecharActionPerformed
+
+    private void salvar() {
+        //SALVA PRODUTO
+        Produto produto = new Produto();
+        produto.setNome(textFieldNome.getText().trim());
+        produto.setTipoUnidade(unidades.get(comboTipoUnidade.getSelectedIndex()));
+        produto.setDoses((Integer) spinnerDose.getValue());
+        produto.setObservacao(textAreaObservacao.getText().trim());
+        
+        if(produtoDAO == null){
+            produtoDAO = new ProdutoDAO();
+        }
+        
+        try {
+            produtoDAO.salvar(produto);
+        } catch (SQLException ex) {
+            Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
         try {
@@ -247,7 +288,7 @@ public class ProdutoView extends javax.swing.JDialog {
         } else if(spinnerDose.isEnabled() && (Integer) spinnerDose.getValue() < 1){
             JOptionPane.showMessageDialog(this, "Por Favor informe a quantidade de doses", "Dados não Informados", JOptionPane.ERROR_MESSAGE);
         } else{
-            //SALVA PRODUTO
+            salvar();
             JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso!", "Produto Cadastrado", JOptionPane.INFORMATION_MESSAGE);
             textFieldNome.setText("");
             textAreaObservacao.setText("");

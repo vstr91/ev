@@ -24,7 +24,7 @@ public class Produto {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int id;
     private String nome;
-    //private TipoUnidade tipoUnidade;
+    private UnidadeVenda tipoUnidade;
     private Integer doses;
     private String observacao;
 
@@ -39,13 +39,13 @@ public class Produto {
         this.nome = nome;
     }
 
-//    public TipoUnidade getTipoUnidade() {
-//        return tipoUnidade;
-//    }
-//
-//    public void setTipoUnidade(TipoUnidade tipoUnidade) {
-//        this.tipoUnidade = tipoUnidade;
-//    }
+    public UnidadeVenda getTipoUnidade() {
+        return tipoUnidade;
+    }
+
+    public void setTipoUnidade(UnidadeVenda tipoUnidade) {
+        this.tipoUnidade = tipoUnidade;
+    }
 
     public Integer getDoses() {
         return doses;
