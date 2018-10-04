@@ -54,5 +54,38 @@ public class UnidadeVendaDAO {
         return unidades;
         
     }
+    
+    public UnidadeVenda carregar(int id) throws SQLException {
+
+        String query = "SELECT * FROM unidade_venda WHERE id = ?";
+        PreparedStatement ps = null;
+        UnidadeVenda unidadeVenda = null;
+
+        try (Connection con = new ConnectionFactory().getConnection()) {
+            
+            ps = con.prepareStatement(query);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            
+            while(rs.next()){
+                unidadeVenda = new UnidadeVenda();
+                unidadeVenda.setId(rs.getInt(1));
+                unidadeVenda.setNome(rs.getString(2));
+            }
+            
+            ps.close();
+            
+        } catch (SQLException e) {
+            System.out.println(e);
+            
+            if(ps != null){
+                ps.close();
+            }
+            
+        }
+        
+        return unidadeVenda;
+        
+    }
 
 }

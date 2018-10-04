@@ -27,8 +27,12 @@ public class Ev {
     public static void main(String[] args) {
 
         try {
-            // Set cross-platform Java L&F (also called "Metal")
-            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
         } catch (UnsupportedLookAndFeelException e) {
             // handle exception
         } catch (ClassNotFoundException e) {

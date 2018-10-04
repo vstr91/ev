@@ -6,13 +6,19 @@
 package view;
 
 import ev.Ev;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import model.Produto;
+import model.ProdutoTableModel;
 import model.UnidadeVenda;
 import model.dao.ProdutoDAO;
 import model.dao.UnidadeVendaDAO;
@@ -23,26 +29,55 @@ import model.dao.UnidadeVendaDAO;
 public class ProdutoView extends javax.swing.JDialog {
 
     List<UnidadeVenda> unidades;
-    ProdutoDAO produtoDAO = null;
-    
+    List<Produto> produtos;
+    ProdutoDAO produtoDAO = new ProdutoDAO();
+    ProdutoTableModel tableModelProduto;
+    Produto produto;
+
     /**
      * Creates new form ProdutoView
      */
     public ProdutoView() {
         initComponents();
-        
+
         UnidadeVendaDAO unidadeVendaDAO = new UnidadeVendaDAO();
         try {
             unidades = unidadeVendaDAO.listarTodos();
-            
-            for(UnidadeVenda un : unidades){
+
+            for (UnidadeVenda un : unidades) {
                 comboTipoUnidade.addItem(un.getNome());
             }
-            
+
+            produtos = produtoDAO.listarTodos();
+
+            tableModelProduto = new ProdutoTableModel(produtos);
+            tableProdutos.setModel(tableModelProduto);
+            tableProdutos.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+                    if (tableProdutos.getSelectedRow() > -1) {
+                        System.out.println("AAAAAAA");
+                        
+                        //if (tableProdutos.getCellSelectionEnabled()) {
+                            tableProdutos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                            int rowIndex = tableProdutos.getSelectedRow();
+                            int colIndex = tableProdutos.getSelectedColumn();
+
+                            if (rowIndex > -1) {
+                                Produto p = tableModelProduto.getProduto(rowIndex);
+                                System.out.println("Escolhido: " + p.getNome());
+                            }
+
+                        //}
+                        
+                    }
+                }
+            });
+
         } catch (SQLException ex) {
             Logger.getLogger(Ev.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
     /**
@@ -199,6 +234,11 @@ public class ProdutoView extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
+        tableProdutos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableProdutosMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(tableProdutos);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -230,9 +270,9 @@ public class ProdutoView extends javax.swing.JDialog {
     }//GEN-LAST:event_btnFecharActionPerformed
 
     private void comboTipoUnidadeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboTipoUnidadeActionPerformed
-        if(comboTipoUnidade.getSelectedItem().equals("Dose")){
+        if (comboTipoUnidade.getSelectedItem().equals("Dose")) {
             spinnerDose.setEnabled(true);
-        } else{
+        } else {
             spinnerDose.setEnabled(false);
             spinnerDose.setValue(0);
         }
@@ -244,31 +284,31 @@ public class ProdutoView extends javax.swing.JDialog {
         } catch (ParseException ex) {
             Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        if(textFieldNome.getText() == null || textFieldNome.getText().trim().equals("") || textFieldNome.getText().trim().isEmpty()){
+
+        if (textFieldNome.getText() == null || textFieldNome.getText().trim().equals("") || textFieldNome.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Por Favor digite o nome do produto", "Dados não Informados", JOptionPane.ERROR_MESSAGE);
-        } else if(spinnerDose.isEnabled() && (Integer) spinnerDose.getValue() < 1){
+        } else if (spinnerDose.isEnabled() && (Integer) spinnerDose.getValue() < 1) {
             JOptionPane.showMessageDialog(this, "Por Favor informe a quantidade de doses", "Dados não Informados", JOptionPane.ERROR_MESSAGE);
-        } else{
+        } else {
             salvar();
             JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso!", "Produto Cadastrado", JOptionPane.INFORMATION_MESSAGE);
             dispose();
         }
-        
+
     }//GEN-LAST:event_btnSalvarEFecharActionPerformed
 
     private void salvar() {
         //SALVA PRODUTO
-        Produto produto = new Produto();
+        produto = new Produto();
         produto.setNome(textFieldNome.getText().trim());
         produto.setTipoUnidade(unidades.get(comboTipoUnidade.getSelectedIndex()));
         produto.setDoses((Integer) spinnerDose.getValue());
         produto.setObservacao(textAreaObservacao.getText().trim());
-        
-        if(produtoDAO == null){
+
+        if (produtoDAO == null) {
             produtoDAO = new ProdutoDAO();
         }
-        
+
         try {
             produtoDAO.salvar(produto);
         } catch (SQLException ex) {
@@ -282,28 +322,33 @@ public class ProdutoView extends javax.swing.JDialog {
         } catch (ParseException ex) {
             Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        if(textFieldNome.getText() == null || textFieldNome.getText().trim().equals("") || textFieldNome.getText().trim().isEmpty()){
+
+        if (textFieldNome.getText() == null || textFieldNome.getText().trim().equals("") || textFieldNome.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Por Favor digite o nome do produto", "Dados não Informados", JOptionPane.ERROR_MESSAGE);
-        } else if(spinnerDose.isEnabled() && (Integer) spinnerDose.getValue() < 1){
+        } else if (spinnerDose.isEnabled() && (Integer) spinnerDose.getValue() < 1) {
             JOptionPane.showMessageDialog(this, "Por Favor informe a quantidade de doses", "Dados não Informados", JOptionPane.ERROR_MESSAGE);
-        } else{
+        } else {
             salvar();
             JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso!", "Produto Cadastrado", JOptionPane.INFORMATION_MESSAGE);
             textFieldNome.setText("");
             textAreaObservacao.setText("");
             spinnerDose.setValue(0);
             comboTipoUnidade.setSelectedIndex(0);
+            tableModelProduto.addProduto(produto);
         }
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
-    private boolean testaRegistro(){
+    private void tableProdutosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableProdutosMouseClicked
+
+    }//GEN-LAST:event_tableProdutosMouseClicked
+
+    private boolean testaRegistro() {
         boolean retorno = false;
-        
-        if((textFieldNome.getText() == null || textFieldNome.getText().trim().equals("") || textFieldNome.getText().trim().isEmpty()) 
-                && (spinnerDose.isEnabled() && (Integer) spinnerDose.getValue() < 1)){
+
+        if ((textFieldNome.getText() == null || textFieldNome.getText().trim().equals("") || textFieldNome.getText().trim().isEmpty())
+                && (spinnerDose.isEnabled() && (Integer) spinnerDose.getValue() < 1)) {
             return false;
-        } else{
+        } else {
             return true;
         }
     }
