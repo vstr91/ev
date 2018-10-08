@@ -6,17 +6,12 @@
 package view;
 
 import ev.Ev;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import model.Produto;
 import model.ProdutoTableModel;
 import model.UnidadeVenda;
@@ -33,6 +28,8 @@ public class ProdutoView extends javax.swing.JDialog {
     ProdutoDAO produtoDAO = new ProdutoDAO();
     ProdutoTableModel tableModelProduto;
     Produto produto;
+    boolean flagEdicao = false;
+    Integer idProduto;
 
     /**
      * Creates new form ProdutoView
@@ -52,27 +49,6 @@ public class ProdutoView extends javax.swing.JDialog {
 
             tableModelProduto = new ProdutoTableModel(produtos);
             tableProdutos.setModel(tableModelProduto);
-            tableProdutos.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    if (tableProdutos.getSelectedRow() > -1) {
-                        System.out.println("AAAAAAA");
-                        
-                        //if (tableProdutos.getCellSelectionEnabled()) {
-                            tableProdutos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                            int rowIndex = tableProdutos.getSelectedRow();
-                            int colIndex = tableProdutos.getSelectedColumn();
-
-                            if (rowIndex > -1) {
-                                Produto p = tableModelProduto.getProduto(rowIndex);
-                                System.out.println("Escolhido: " + p.getNome());
-                            }
-
-                        //}
-                        
-                    }
-                }
-            });
 
         } catch (SQLException ex) {
             Logger.getLogger(Ev.class.getName()).log(Level.SEVERE, null, ex);
@@ -309,11 +285,26 @@ public class ProdutoView extends javax.swing.JDialog {
             produtoDAO = new ProdutoDAO();
         }
 
-        try {
-            produtoDAO.salvar(produto);
-        } catch (SQLException ex) {
-            Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+        if (flagEdicao && idProduto != null) {
+            produto.setId(idProduto);
+            try {
+                produtoDAO.editar(produto);
+            } catch (SQLException ex) {
+                Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+//                flagEdicao = false;
+                idProduto = null;
+                btnCadastrar.setText("Cadastrar");
+                btnSalvarEFechar.setText("Cadastrar e Fechar");
+            }
+        } else {
+            try {
+                produtoDAO.salvar(produto);
+            } catch (SQLException ex) {
+                Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+
     }
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
@@ -334,12 +325,35 @@ public class ProdutoView extends javax.swing.JDialog {
             textAreaObservacao.setText("");
             spinnerDose.setValue(0);
             comboTipoUnidade.setSelectedIndex(0);
-            tableModelProduto.addProduto(produto);
+
+            if (flagEdicao) {
+                carregarRegistrosTabela();
+                flagEdicao = false;
+            } else {
+                tableModelProduto.addProduto(produto);
+            }
+
         }
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
     private void tableProdutosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableProdutosMouseClicked
+        if (evt.getClickCount() >= 2) {
+            int linha = tableProdutos.getSelectedRow();
 
+            Produto p = produtos.get(linha);
+
+            flagEdicao = true;
+
+            textFieldNome.setText(p.getNome());
+            textAreaObservacao.setText(p.getObservacao());
+            spinnerDose.setValue(p.getDoses());
+            comboTipoUnidade.setSelectedItem(p.getTipoUnidade().getNome());
+
+            idProduto = p.getId();
+            btnCadastrar.setText("Editar");
+            btnSalvarEFechar.setText("Editar e Fechar");
+
+        }
     }//GEN-LAST:event_tableProdutosMouseClicked
 
     private boolean testaRegistro() {
@@ -351,6 +365,17 @@ public class ProdutoView extends javax.swing.JDialog {
         } else {
             return true;
         }
+    }
+
+    private void carregarRegistrosTabela() {
+        try {
+            produtos = produtoDAO.listarTodos();
+        } catch (SQLException ex) {
+            Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        tableModelProduto = new ProdutoTableModel(produtos);
+        tableProdutos.setModel(tableModelProduto);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

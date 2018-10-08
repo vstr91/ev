@@ -10,44 +10,40 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import model.Evento;
 import model.Produto;
 import model.UnidadeVenda;
+import org.joda.time.DateTime;
 
 /**
  *
  */
-public class ProdutoDAO {
+public class EventoDAO {
 
-    public ProdutoDAO() {
+    public EventoDAO() {
 
     }
     
-    public List<Produto> listarTodos() throws SQLException {
+    public List<Evento> listarTodos() throws SQLException {
 
-        String query = "SELECT * FROM produto";
+        String query = "SELECT * FROM evento";
         PreparedStatement ps = null;
-        List<Produto> produtos = new ArrayList<>();
+        List<Evento> eventos = new ArrayList<>();
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             ps = con.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
-            UnidadeVendaDAO unidadeVendaDAO = new UnidadeVendaDAO();
             
             while(rs.next()){
-                Produto produto = new Produto();
-                produto.setId(rs.getInt(1));
-                produto.setNome(rs.getString(2));
-                
-                UnidadeVenda unidadeVenda = unidadeVendaDAO.carregar(rs.getInt(3));
-                
-                produto.setTipoUnidade(unidadeVenda);
-                produto.setDoses(rs.getInt(4));
-                produto.setObservacao(rs.getString(5));
-                produtos.add(produto);
+                Evento evento = new Evento();
+                evento.setId(rs.getInt(1));
+                evento.setNome(rs.getString(2));
+                evento.setData(new DateTime(rs.getDate(2)));
+                evento.setObservacao(rs.getString(5));
+                eventos.add(evento);
             }
             
             ps.close();
@@ -61,21 +57,20 @@ public class ProdutoDAO {
             
         }
         
-        return produtos;
+        return eventos;
         
     }
 
-    public void salvar(Produto produto) throws SQLException {
+    public void salvar(Evento evento) throws SQLException {
 
-        String query = "INSERT INTO produto (nome, unidade_venda, doses, observacao) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO evento (nome, data, observacao) VALUES (?, ?, ?)";
         PreparedStatement ps = null;
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             ps = con.prepareStatement(query);
-            ps.setString(1, produto.getNome());
-            ps.setInt(2, produto.getTipoUnidade().getId());
-            ps.setInt(3, produto.getDoses());
+            ps.setString(1, evento.getNome());
+            ps.setDate(2, evento.getData().toDate(), Calendar.getInstance());
             ps.setString(4, produto.getObservacao());
             ps.execute();
             ps.close();

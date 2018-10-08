@@ -5,16 +5,22 @@
  */
 package view;
 
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import model.Evento;
+import model.dao.ProdutoDAO;
 
 /**
  *
  */
 public class NovoEventoView extends javax.swing.JDialog {
 
+    Evento evento;
+    EventoDAO eventoDAO;
+    
     /**
      * Creates new form NovoEventoView
      */
@@ -42,6 +48,8 @@ public class NovoEventoView extends javax.swing.JDialog {
         jScrollPane1 = new javax.swing.JScrollPane();
         textAreaObservacao = new javax.swing.JTextArea();
         btnCadastrar = new javax.swing.JButton();
+        jLabel5 = new javax.swing.JLabel();
+        textFieldData = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Novo Evento");
@@ -67,6 +75,8 @@ public class NovoEventoView extends javax.swing.JDialog {
             }
         });
 
+        jLabel5.setText("Data");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -74,33 +84,43 @@ public class NovoEventoView extends javax.swing.JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(textFieldNome)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabel1)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(spinnerBares))
-                                .addGap(18, 18, 18)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(spinnerBarracas)))
-                            .addComponent(jLabel4))
-                        .addGap(0, 116, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 356, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(btnCadastrar)))
+                        .addComponent(btnCadastrar))
+                    .addComponent(jLabel4)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(82, 82, 82)
+                                .addComponent(jLabel5))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(77, 77, 77)
+                                .addComponent(jLabel3))))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(spinnerBares, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
+                            .addComponent(textFieldNome))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(spinnerBarracas)
+                            .addComponent(textFieldData))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(textFieldNome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(textFieldNome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(textFieldData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
@@ -165,6 +185,39 @@ public class NovoEventoView extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
+    private void salvar() {
+        //SALVA PRODUTO
+        evento = new Evento();
+        evento.setNome(textFieldNome.getText().trim());
+        produto.setTipoUnidade(unidades.get(comboTipoUnidade.getSelectedIndex()));
+        produto.setDoses((Integer) spinnerDose.getValue());
+        produto.setObservacao(textAreaObservacao.getText().trim());
+
+        if (produtoDAO == null) {
+            produtoDAO = new ProdutoDAO();
+        }
+
+        if (flagEdicao && idProduto != null) {
+            produto.setId(idProduto);
+            try {
+                produtoDAO.editar(produto);
+            } catch (SQLException ex) {
+                Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+//                flagEdicao = false;
+                idProduto = null;
+                btnCadastrar.setText("Cadastrar");
+                btnSalvarEFechar.setText("Cadastrar e Fechar");
+            }
+        } else {
+            try {
+                produtoDAO.salvar(produto);
+            } catch (SQLException ex) {
+                Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCadastrar;
@@ -172,11 +225,13 @@ public class NovoEventoView extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSpinner spinnerBares;
     private javax.swing.JSpinner spinnerBarracas;
     private javax.swing.JTextArea textAreaObservacao;
+    private javax.swing.JTextField textFieldData;
     private javax.swing.JTextField textFieldNome;
     // End of variables declaration//GEN-END:variables
 }
