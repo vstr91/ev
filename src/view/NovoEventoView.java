@@ -10,8 +10,12 @@ import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import model.BarracaEvento;
+import model.CaixaEvento;
 import model.Evento;
-import model.dao.ProdutoDAO;
+import model.dao.CaixaEventoDAO;
+import model.dao.EventoDAO;
+import org.joda.time.format.DateTimeFormat;
 
 /**
  *
@@ -20,6 +24,9 @@ public class NovoEventoView extends javax.swing.JDialog {
 
     Evento evento;
     EventoDAO eventoDAO;
+    Integer idEvento;
+    boolean flagEdicao = false;
+    Integer idGerado = -1;
     
     /**
      * Creates new form NovoEventoView
@@ -171,8 +178,52 @@ public class NovoEventoView extends javax.swing.JDialog {
         } else if((Integer) spinnerBares.getValue() < 1 && (Integer) spinnerBarracas.getValue() < 1){
             JOptionPane.showMessageDialog(this, "Por Favor informe a quantidade de caixas e/ou barracas do evento", "Dados não Informados", JOptionPane.ERROR_MESSAGE);
         } else{
-            //SALVA PRODUTO
+            int totalBares = (int) spinnerBares.getValue();
+            int totalBarracas = (int) spinnerBarracas.getValue();
+            
+            //salvar();
             JOptionPane.showMessageDialog(this, "Evento cadastrado com sucesso!", "Produto Cadastrado", JOptionPane.INFORMATION_MESSAGE);
+            CaixaEventoDAO caixaEventoDAO = new CaixaEventoDAO();
+            
+            for(int i = 0; i < totalBares; i++){
+                CaixaEvento caixaEvento = new CaixaEvento();
+                caixaEvento.setNome("Caixa "+(i+1));
+                caixaEvento.setNumero(i+1);
+                
+                Evento umEvento = new Evento();
+                umEvento.setId(idGerado);
+                
+                caixaEvento.setEvento(umEvento);
+                
+                System.out.println("Caixa "+caixaEvento.getNome());
+                
+//                try {
+//                    caixaEventoDAO.salvar(caixaEvento);
+//                } catch (SQLException ex) {
+//                    Logger.getLogger(NovoEventoView.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+                
+            }
+            
+            for(int i = 0; i < totalBarracas; i++){
+                BarracaEvento barracaEvento = new BarracaEvento();
+                barracaEvento.setNome("Barraca "+(i+1));
+                barracaEvento.setNumero(i+1);
+                
+                Evento umEvento = new Evento();
+                umEvento.setId(idGerado);
+                
+                barracaEvento.setEvento(umEvento);
+                
+                System.out.println("Barraca "+barracaEvento.getNome());
+                
+//                try {
+//                    caixaEventoDAO.salvar(caixaEvento);
+//                } catch (SQLException ex) {
+//                    Logger.getLogger(NovoEventoView.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+                
+            }
             
             dispose();
             
@@ -189,29 +240,27 @@ public class NovoEventoView extends javax.swing.JDialog {
         //SALVA PRODUTO
         evento = new Evento();
         evento.setNome(textFieldNome.getText().trim());
-        produto.setTipoUnidade(unidades.get(comboTipoUnidade.getSelectedIndex()));
-        produto.setDoses((Integer) spinnerDose.getValue());
-        produto.setObservacao(textAreaObservacao.getText().trim());
+        evento.setData(DateTimeFormat.forPattern("dd/mm/YYYY").parseDateTime(textFieldData.getText()));
+        evento.setObservacao(textAreaObservacao.getText().trim());
 
-        if (produtoDAO == null) {
-            produtoDAO = new ProdutoDAO();
+        if (eventoDAO == null) {
+            eventoDAO = new EventoDAO();
         }
 
-        if (flagEdicao && idProduto != null) {
-            produto.setId(idProduto);
+        if (flagEdicao && idEvento != null) {
+            evento.setId(idEvento);
             try {
-                produtoDAO.editar(produto);
+                eventoDAO.editar(evento);
             } catch (SQLException ex) {
                 Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
 //                flagEdicao = false;
-                idProduto = null;
+                idEvento = null;
                 btnCadastrar.setText("Cadastrar");
-                btnSalvarEFechar.setText("Cadastrar e Fechar");
             }
         } else {
             try {
-                produtoDAO.salvar(produto);
+                idGerado = eventoDAO.salvar(evento);
             } catch (SQLException ex) {
                 Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
             }

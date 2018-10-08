@@ -10,30 +10,26 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
+import model.Caixa;
+import model.CaixaEvento;
 import model.Evento;
-import model.Produto;
-import model.UnidadeVenda;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 
 /**
  *
  */
-public class EventoDAO {
+public class CaixaEventoDAO {
 
-    public EventoDAO() {
+    public CaixaEventoDAO() {
 
     }
     
-    public List<Evento> listarTodos() throws SQLException {
+    public List<CaixaEvento> listarTodos() throws SQLException {
 
-        String query = "SELECT * FROM evento";
+        String query = "SELECT * FROM caixa_evento";
         PreparedStatement ps = null;
-        List<Evento> eventos = new ArrayList<>();
+        List<CaixaEvento> caixas = new ArrayList<>();
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
@@ -41,12 +37,17 @@ public class EventoDAO {
             ResultSet rs = ps.executeQuery();
             
             while(rs.next()){
+                CaixaEvento caixaEvento = new CaixaEvento();
+                caixaEvento.setId(rs.getInt(1));
+                caixaEvento.setNome(rs.getString(2));
+                caixaEvento.setNumero(rs.getInt(3));
+                
                 Evento evento = new Evento();
-                evento.setId(rs.getInt(1));
-                evento.setNome(rs.getString(2));
-                evento.setData(new DateTime(rs.getDate(2)));
-                evento.setObservacao(rs.getString(5));
-                eventos.add(evento);
+                evento.setId(rs.getInt(4));
+                
+                caixaEvento.setEvento(evento);
+                
+                caixas.add(caixaEvento);
             }
             
             ps.close();
@@ -60,57 +61,47 @@ public class EventoDAO {
             
         }
         
-        return eventos;
+        return caixas;
         
     }
 
-    public Integer salvar(Evento evento) throws SQLException {
+    public void salvar(CaixaEvento caixaEvento) throws SQLException {
 
-        String query = "INSERT INTO evento (nome, data, observacao) VALUES (?, ?, ?)";
-        PreparedStatement ps = null;
-        Integer id = null;
-
-        try (Connection con = new ConnectionFactory().getConnection()) {
-            
-            ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, evento.getNome());
-            ps.setDate(2, new Date(evento.getData().getMillis()));
-            ps.setString(3, evento.getObservacao());
-            ps.executeUpdate();
-            
-            ResultSet rs = ps.getGeneratedKeys();
-            rs.next();
-            id = rs.getInt(1);
-            
-            ps.close();
-            
-            
-            
-        } catch (SQLException e) {
-            System.out.println(e);
-            
-            if(ps != null){
-                ps.close();
-            }
-            
-        }
-        
-        return id;
-        
-    }
-    
-    public void editar(Evento evento) throws SQLException {
-
-        String query = "UPDATE evento SET nome = ?, data = ?, observacao = ? WHERE id = ?";
+        String query = "INSERT INTO caixa_evento (nome, numero, evento) VALUES (?, ?, ?)";
         PreparedStatement ps = null;
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             ps = con.prepareStatement(query);
-            ps.setString(1, evento.getNome());
-            ps.setDate(2, new Date(evento.getData().getMillis()));
-            ps.setString(3, evento.getObservacao());
-            ps.setInt(4, evento.getId());
+            ps.setString(1, caixaEvento.getNome());
+            ps.setInt(2,caixaEvento.getNumero());
+            ps.setInt(3, caixaEvento.getEvento().getId());
+            ps.execute();
+            ps.close();
+            
+        } catch (SQLException e) {
+            System.out.println(e);
+            
+            if(ps != null){
+                ps.close();
+            }
+            
+        }
+        
+    }
+    
+    public void editar(CaixaEvento caixaEvento) throws SQLException {
+
+        String query = "UPDATE caixa_evento SET nome = ?, numero = ?, evento = ? WHERE id = ?";
+        PreparedStatement ps = null;
+
+        try (Connection con = new ConnectionFactory().getConnection()) {
+            
+            ps = con.prepareStatement(query);
+            ps.setString(1, caixaEvento.getNome());
+            ps.setInt(2,caixaEvento.getNumero());
+            ps.setInt(3, caixaEvento.getEvento().getId());
+            ps.setInt(4, caixaEvento.getId());
             ps.execute();
             ps.close();
             
