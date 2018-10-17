@@ -5,16 +5,37 @@
  */
 package view;
 
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import model.Evento;
+import model.EventoTableModel;
+import model.dao.EventoDAO;
+
 /**
  *
  */
 public class MainView extends javax.swing.JFrame {
+
+    List<Evento> eventos;
+    EventoDAO eventoDAO = new EventoDAO();
+    EventoTableModel tableModelEvento;
 
     /**
      * Creates new form MainView
      */
     public MainView() {
         initComponents();
+
+        try {
+            eventos = eventoDAO.listarTodos();
+            tableModelEvento = new EventoTableModel(eventos);
+            tableEventos.setModel(tableModelEvento);
+        } catch (SQLException ex) {
+            Logger.getLogger(MainView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     /**
@@ -44,6 +65,12 @@ public class MainView extends javax.swing.JFrame {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        jScrollPane1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jScrollPane1MouseClicked(evt);
+            }
+        });
+
         tableEventos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -55,6 +82,11 @@ public class MainView extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tableEventos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableEventosMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tableEventos);
 
         jLabel1.setText("Eventos");
@@ -157,6 +189,25 @@ public class MainView extends javax.swing.JFrame {
         novoEventoView.setModal(true);
         novoEventoView.setVisible(true);
     }//GEN-LAST:event_btnNovoEventoActionPerformed
+
+    private void jScrollPane1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jScrollPane1MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jScrollPane1MouseClicked
+
+    private void tableEventosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableEventosMouseClicked
+        if (evt.getClickCount() >= 2) {
+            int linha = tableEventos.getSelectedRow();
+
+            Evento e = eventos.get(linha);
+
+            FechamentoView fechamentoView = new FechamentoView(e);
+            fechamentoView.setLocationRelativeTo(this);
+            fechamentoView.setResizable(false);
+            fechamentoView.setModal(true);
+            fechamentoView.setVisible(true);
+
+        }
+    }//GEN-LAST:event_tableEventosMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

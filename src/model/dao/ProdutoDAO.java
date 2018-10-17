@@ -118,5 +118,46 @@ public class ProdutoDAO {
         }
         
     }
+    
+    public Produto carregar(Produto umProduto) throws SQLException {
+
+        String query = "SELECT * FROM produto WHERE id = ?";
+        PreparedStatement ps = null;
+        List<Produto> produtos = new ArrayList<>();
+        Produto produto = null;
+
+        try (Connection con = new ConnectionFactory().getConnection()) {
+            
+            ps = con.prepareStatement(query);
+            ps.setInt(1, umProduto.getId());
+            ResultSet rs = ps.executeQuery();
+            UnidadeVendaDAO unidadeVendaDAO = new UnidadeVendaDAO();
+            
+            while(rs.next()){
+                produto = new Produto();
+                produto.setId(rs.getInt(1));
+                produto.setNome(rs.getString(2));
+                
+                UnidadeVenda unidadeVenda = unidadeVendaDAO.carregar(rs.getInt(3));
+                
+                produto.setTipoUnidade(unidadeVenda);
+                produto.setDoses(rs.getInt(4));
+                produto.setObservacao(rs.getString(5));
+            }
+            
+            ps.close();
+            
+        } catch (SQLException e) {
+            System.out.println(e);
+            
+            if(ps != null){
+                ps.close();
+            }
+            
+        }
+        
+        return produto;
+        
+    }
 
 }

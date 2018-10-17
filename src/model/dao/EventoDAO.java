@@ -44,8 +44,10 @@ public class EventoDAO {
                 Evento evento = new Evento();
                 evento.setId(rs.getInt(1));
                 evento.setNome(rs.getString(2));
-                evento.setData(new DateTime(rs.getDate(2)));
-                evento.setObservacao(rs.getString(5));
+                System.out.println(rs.getString(3));
+                evento.setData(DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.S")
+                        .parseDateTime(rs.getString(3)));
+                evento.setObservacao(rs.getString(4));
                 eventos.add(evento);
             }
             
@@ -122,6 +124,43 @@ public class EventoDAO {
             }
             
         }
+        
+    }
+    
+    public Evento carregar(Evento umEvento) throws SQLException {
+
+        String query = "SELECT * FROM evento WHERE id = ?";
+        PreparedStatement ps = null;
+        Evento evento = null;
+
+        try (Connection con = new ConnectionFactory().getConnection()) {
+            
+            ps = con.prepareStatement(query);
+            ps.setInt(1, umEvento.getId());
+            ResultSet rs = ps.executeQuery();
+            
+            while(rs.next()){
+                evento = new Evento();
+                evento.setId(rs.getInt(1));
+                evento.setNome(rs.getString(2));
+                System.out.println(rs.getString(3));
+                evento.setData(DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.S")
+                        .parseDateTime(rs.getString(3)));
+                evento.setObservacao(rs.getString(4));
+            }
+            
+            ps.close();
+            
+        } catch (SQLException e) {
+            System.out.println(e);
+            
+            if(ps != null){
+                ps.close();
+            }
+            
+        }
+        
+        return evento;
         
     }
 

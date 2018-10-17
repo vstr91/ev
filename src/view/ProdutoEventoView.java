@@ -5,18 +5,42 @@
  */
 package view;
 
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import model.Evento;
+import model.ProdutoEvento;
+import model.ProdutoEventoTableModel;
+import model.dao.ProdutoEventoDAO;
+
 /**
  *
  */
 public class ProdutoEventoView extends javax.swing.JDialog {
 
     boolean returnToParent = false;
-    
+    Evento evento;
+    List<ProdutoEvento> produtos;
+    ProdutoEventoDAO produtoEventoDAO = new ProdutoEventoDAO();
+    ProdutoEventoTableModel tableModelProdutoEvento;
+
     /**
      * Creates new form ProdutoEventoView
      */
-    public ProdutoEventoView() {
+    public ProdutoEventoView(Evento e) {
         initComponents();
+        this.evento = e;
+
+        try {
+            produtos = produtoEventoDAO.listarTodosPorEvento(evento);
+            tableModelProdutoEvento = new ProdutoEventoTableModel(produtos);
+            tableProdutos.setModel(tableModelProdutoEvento);
+        } catch (SQLException ex) {
+            Logger.getLogger(ProdutoEventoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+
     }
 
     /**
@@ -114,8 +138,8 @@ public class ProdutoEventoView extends javax.swing.JDialog {
     }//GEN-LAST:event_btnNovoProdutoActionPerformed
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
-        if(returnToParent){
-            FechamentoView fechamentoView = new FechamentoView();
+        if (returnToParent) {
+            FechamentoView fechamentoView = new FechamentoView(evento);
             fechamentoView.setLocationRelativeTo(this);
             fechamentoView.setAlwaysOnTop(true);
             fechamentoView.setModal(true);
@@ -123,7 +147,7 @@ public class ProdutoEventoView extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_formWindowClosed
 
-    public void returnToParent(boolean val){
+    public void returnToParent(boolean val) {
         returnToParent = val;
     }
 

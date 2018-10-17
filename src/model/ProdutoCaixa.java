@@ -11,7 +11,32 @@ package model;
  */
 public class ProdutoCaixa {
     
-    private Produto produto;
-    private Caixa caixa;
+    private ProdutoEvento produto;
+    private CaixaEvento caixa;
+    private int quantidade;
+
+    public ProdutoEvento getProduto() {
+        return produto;
+    }
+
+    public void setProduto(ProdutoEvento produto) {
+        this.produto = produto;
+    }
+
+    public CaixaEvento getCaixa() {
+        return caixa;
+    }
+
+    public void setCaixa(CaixaEvento caixa) {
+        this.caixa = caixa;
+    }
+
+    public int getQuantidade() {
+        return quantidade;
+    }
+
+    public void setQuantidade(int quantidade) {
+        this.quantidade = quantidade;
+    }
     
 }

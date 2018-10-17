@@ -64,6 +64,46 @@ public class CaixaEventoDAO {
         return caixas;
         
     }
+    
+    public List<CaixaEvento> listarTodosPorEvento(Evento ev) throws SQLException {
+
+        String query = "SELECT * FROM caixa_evento WHERE evento = "+ev.getId();
+        PreparedStatement ps = null;
+        List<CaixaEvento> caixas = new ArrayList<>();
+
+        try (Connection con = new ConnectionFactory().getConnection()) {
+            
+            ps = con.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            
+            while(rs.next()){
+                CaixaEvento caixaEvento = new CaixaEvento();
+                caixaEvento.setId(rs.getInt(1));
+                caixaEvento.setNome(rs.getString(2));
+                caixaEvento.setNumero(rs.getInt(3));
+                
+                Evento evento = new Evento();
+                evento.setId(rs.getInt(4));
+                
+                caixaEvento.setEvento(evento);
+                
+                caixas.add(caixaEvento);
+            }
+            
+            ps.close();
+            
+        } catch (SQLException e) {
+            System.out.println(e);
+            
+            if(ps != null){
+                ps.close();
+            }
+            
+        }
+        
+        return caixas;
+        
+    }
 
     public void salvar(CaixaEvento caixaEvento) throws SQLException {
 

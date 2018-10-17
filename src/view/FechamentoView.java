@@ -8,10 +8,21 @@ package view;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import model.BarracaEvento;
+import model.BarracaTableModel;
+import model.CaixaEvento;
+import model.CaixaTableModel;
+import model.Evento;
+import model.dao.BarracaEventoDAO;
+import model.dao.CaixaEventoDAO;
+import org.joda.time.format.DateTimeFormat;
 
 /**
  *
@@ -19,29 +30,67 @@ import javax.swing.JTable;
 public class FechamentoView extends javax.swing.JDialog {
 
     JDialog parent;
-    
+    private Evento evento;
+    CaixaTableModel tableModelCaixa;
+    CaixaEventoDAO caixaEventoDAO = new CaixaEventoDAO();
+    List<CaixaEvento> caixas;
+    BarracaTableModel tableModelBarraca;
+    BarracaEventoDAO barracaEventoDAO = new BarracaEventoDAO();
+    List<BarracaEvento> barracas;
+
+    public Evento getEvento() {
+        return evento;
+    }
+
+    public void setEvento(Evento evento) {
+        this.evento = evento;
+    }
+
     /**
      * Creates new form FechamentoView
      */
-    public FechamentoView() {
+    public FechamentoView(Evento e) {
         initComponents();
-        
+
+        this.evento = e;
+
         parent = this;
 
-        tableVendasBar.addMouseListener(new MouseAdapter() {
+        tableVendasBarracas.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
                 JTable table = (JTable) mouseEvent.getSource();
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
                 if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
-                    CaixaView caixaView = new CaixaView();
-                    caixaView.setLocationRelativeTo(null);
-                    caixaView.setAlwaysOnTop(true);
-                    caixaView.setModal(true);
-                    caixaView.setVisible(true);
+                    BarracaView barracaView = new BarracaView();
+                    barracaView.setLocationRelativeTo(null);
+                    barracaView.setAlwaysOnTop(true);
+                    barracaView.setModal(true);
+                    barracaView.setVisible(true);
                 }
             }
         });
+
+        if (evento != null) {
+            labelEvento.setText(evento.getNome() + " - " + DateTimeFormat.forPattern("dd/MM/YYYY")
+                    .print(evento.getData()));
+
+            try {
+                caixas = caixaEventoDAO.listarTodosPorEvento(evento);
+                tableModelCaixa = new CaixaTableModel(caixas);
+                tableVendasBar.setModel(tableModelCaixa);
+                labelVendasBar.setText(String.valueOf(tableModelCaixa.getQtdTotalVendida()));
+
+                //Barracas
+                barracas = barracaEventoDAO.listarTodosPorEvento(evento);
+                tableModelBarraca = new BarracaTableModel(barracas);
+                tableVendasBarracas.setModel(tableModelBarraca);
+                labelVendasBarracas.setText(String.valueOf(tableModelBarraca.getQtdTotalVendida()));
+
+            } catch (SQLException ex) {
+                Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
 
     }
 
@@ -575,7 +624,7 @@ public class FechamentoView extends javax.swing.JDialog {
     private void btnProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProdutosActionPerformed
         dispose();
 
-        ProdutoEventoView produtoEventoView = new ProdutoEventoView();
+        ProdutoEventoView produtoEventoView = new ProdutoEventoView(evento);
         produtoEventoView.setLocationRelativeTo(this);
         produtoEventoView.setAlwaysOnTop(true);
         produtoEventoView.setModal(true);
@@ -584,7 +633,18 @@ public class FechamentoView extends javax.swing.JDialog {
     }//GEN-LAST:event_btnProdutosActionPerformed
 
     private void tableVendasBarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableVendasBarMouseClicked
-        // TODO add your handling code here:
+        if (evt.getClickCount() >= 2) {
+            int linha = tableVendasBar.getSelectedRow();
+
+            CaixaEvento caixa = caixas.get(linha);
+
+            CaixaView caixaView = new CaixaView(caixa);
+            caixaView.setLocationRelativeTo(null);
+            caixaView.setAlwaysOnTop(true);
+            caixaView.setModal(true);
+            caixaView.setVisible(true);
+
+        }
     }//GEN-LAST:event_tableVendasBarMouseClicked
 
 

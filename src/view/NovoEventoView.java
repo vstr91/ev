@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 import model.BarracaEvento;
 import model.CaixaEvento;
 import model.Evento;
+import model.dao.BarracaEventoDAO;
 import model.dao.CaixaEventoDAO;
 import model.dao.EventoDAO;
 import org.joda.time.format.DateTimeFormat;
@@ -181,9 +182,10 @@ public class NovoEventoView extends javax.swing.JDialog {
             int totalBares = (int) spinnerBares.getValue();
             int totalBarracas = (int) spinnerBarracas.getValue();
             
-            //salvar();
+            salvar();
             JOptionPane.showMessageDialog(this, "Evento cadastrado com sucesso!", "Produto Cadastrado", JOptionPane.INFORMATION_MESSAGE);
             CaixaEventoDAO caixaEventoDAO = new CaixaEventoDAO();
+            BarracaEventoDAO barracaEventoDAO = new BarracaEventoDAO();
             
             for(int i = 0; i < totalBares; i++){
                 CaixaEvento caixaEvento = new CaixaEvento();
@@ -197,11 +199,11 @@ public class NovoEventoView extends javax.swing.JDialog {
                 
                 System.out.println("Caixa "+caixaEvento.getNome());
                 
-//                try {
-//                    caixaEventoDAO.salvar(caixaEvento);
-//                } catch (SQLException ex) {
-//                    Logger.getLogger(NovoEventoView.class.getName()).log(Level.SEVERE, null, ex);
-//                }
+                try {
+                    caixaEventoDAO.salvar(caixaEvento);
+                } catch (SQLException ex) {
+                    Logger.getLogger(NovoEventoView.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 
             }
             
@@ -217,17 +219,19 @@ public class NovoEventoView extends javax.swing.JDialog {
                 
                 System.out.println("Barraca "+barracaEvento.getNome());
                 
-//                try {
-//                    caixaEventoDAO.salvar(caixaEvento);
-//                } catch (SQLException ex) {
-//                    Logger.getLogger(NovoEventoView.class.getName()).log(Level.SEVERE, null, ex);
-//                }
+                try {
+                    barracaEventoDAO.salvar(barracaEvento);
+                } catch (SQLException ex) {
+                    Logger.getLogger(NovoEventoView.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 
             }
             
             dispose();
             
-            FechamentoView fechamentoView = new FechamentoView();
+            evento.setId(idGerado);
+            
+            FechamentoView fechamentoView = new FechamentoView(evento);
             fechamentoView.setLocationRelativeTo(this);
             fechamentoView.setAlwaysOnTop(true);
             fechamentoView.setModal(true);
@@ -240,7 +244,7 @@ public class NovoEventoView extends javax.swing.JDialog {
         //SALVA PRODUTO
         evento = new Evento();
         evento.setNome(textFieldNome.getText().trim());
-        evento.setData(DateTimeFormat.forPattern("dd/mm/YYYY").parseDateTime(textFieldData.getText()));
+        evento.setData(DateTimeFormat.forPattern("dd/MM/YYYY").parseDateTime(textFieldData.getText()));
         evento.setObservacao(textAreaObservacao.getText().trim());
 
         if (eventoDAO == null) {
