@@ -8,6 +8,7 @@ package view;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
@@ -19,9 +20,11 @@ import model.BarracaEvento;
 import model.BarracaTableModel;
 import model.CaixaEvento;
 import model.CaixaTableModel;
+import model.Despesa;
 import model.Evento;
 import model.dao.BarracaEventoDAO;
 import model.dao.CaixaEventoDAO;
+import model.dao.ProdutoDAO;
 import org.joda.time.format.DateTimeFormat;
 
 /**
@@ -37,6 +40,9 @@ public class FechamentoView extends javax.swing.JDialog {
     BarracaTableModel tableModelBarraca;
     BarracaEventoDAO barracaEventoDAO = new BarracaEventoDAO();
     List<BarracaEvento> barracas;
+    Despesa despesa;
+
+    BigDecimal totalVendaCaixas = BigDecimal.ZERO;
 
     public Evento getEvento() {
         return evento;
@@ -90,6 +96,17 @@ public class FechamentoView extends javax.swing.JDialog {
             } catch (SQLException ex) {
                 Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
             }
+
+            for (CaixaEvento c : caixas) {
+
+                if (c.getValorTotalVendido() != null) {
+                    totalVendaCaixas = totalVendaCaixas.add(c.getValorTotalVendido());
+                }
+
+            }
+
+            labelVendasBar.setText(totalVendaCaixas.toString());
+
         }
 
     }
@@ -450,7 +467,7 @@ public class FechamentoView extends javax.swing.JDialog {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                    .addComponent(jScrollPane4)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -482,26 +499,23 @@ public class FechamentoView extends javax.swing.JDialog {
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                                 .addComponent(textFieldBarracaChurros, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                         .addGap(0, 0, Short.MAX_VALUE)))
-                                .addGap(49, 49, 49))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                        .addComponent(jScrollPane2)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                            .addComponent(jLabel1)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                            .addComponent(labelVendasBar))
-                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                            .addComponent(jLabel2)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                            .addComponent(labelVendasBarracas))
-                                        .addComponent(jScrollPane1))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(177, 177, 177)
-                                        .addComponent(btnRelatorio)
-                                        .addGap(62, 62, 62)
-                                        .addComponent(btnSalvar)))
-                                .addGap(0, 0, Short.MAX_VALUE)))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(jScrollPane2)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel1)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(labelVendasBar))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel2)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(labelVendasBarracas))
+                                    .addComponent(jScrollPane1))
+                                .addGap(0, 17, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(btnRelatorio)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
@@ -509,7 +523,10 @@ public class FechamentoView extends javax.swing.JDialog {
                                     .addComponent(jLabel13)
                                     .addComponent(jScrollPane3)
                                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnSalvar)))
                         .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(btnProdutos)
@@ -535,13 +552,13 @@ public class FechamentoView extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(16, 16, 16)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
                             .addComponent(labelVendasBarracas))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel14)
@@ -571,14 +588,14 @@ public class FechamentoView extends javax.swing.JDialog {
                             .addComponent(jLabel11)
                             .addComponent(labelConsumoCamarim))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnRelatorio)
                     .addComponent(btnSalvar))
@@ -611,6 +628,7 @@ public class FechamentoView extends javax.swing.JDialog {
                 || textFieldValorPago.getText().trim().isEmpty() || (Integer) spinnerQuantidade.getValue() < 1) {
             JOptionPane.showMessageDialog(this, "Por Favor insira todos os dados.", "Dados não Informados", JOptionPane.ERROR_MESSAGE);
         } else {
+            salvarDespesa();
             JOptionPane.showMessageDialog(this, "Despesa cadastrada com sucesso!", "Despesa Cadastrada", JOptionPane.INFORMATION_MESSAGE);
             textFieldNomeDespesa.setText("");
             textFieldValorUnitario.setText("");
@@ -634,9 +652,12 @@ public class FechamentoView extends javax.swing.JDialog {
 
     private void tableVendasBarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableVendasBarMouseClicked
         if (evt.getClickCount() >= 2) {
+            dispose();
+
             int linha = tableVendasBar.getSelectedRow();
 
             CaixaEvento caixa = caixas.get(linha);
+            caixa.setEvento(evento);
 
             CaixaView caixaView = new CaixaView(caixa);
             caixaView.setLocationRelativeTo(null);
@@ -647,6 +668,41 @@ public class FechamentoView extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_tableVendasBarMouseClicked
 
+    private void salvarDespesa() {
+        //SALVA PRODUTO
+        despesa = new Despesa();
+        despesa.setNome(textFieldNomeDespesa.getText().trim());
+        despesa.setQuantidade((Integer) spinnerQuantidade.getValue());
+        despesa.setValorUnitario(new BigDecimal(Double.valueOf(textFieldValorUnitario.getText())));
+        despesa.setValorPago(new BigDecimal(Double.valueOf(textFieldValorPago.getText())));
+        despesa.setEvento(evento);
+        despesa.setObservacao(textFieldObservacao.getText().trim());
+
+        if (despesaDAO == null) {
+            despesaDAO = new DespesaDAO();
+        }
+
+        if (flagEdicao && idProduto != null) {
+            produto.setId(idProduto);
+            try {
+                produtoDAO.editar(produto);
+            } catch (SQLException ex) {
+                Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+//                flagEdicao = false;
+                idProduto = null;
+                btnCadastrar.setText("Cadastrar");
+                btnSalvarEFechar.setText("Cadastrar e Fechar");
+            }
+        } else {
+            try {
+                produtoDAO.salvar(produto);
+            } catch (SQLException ex) {
+                Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDespesa;

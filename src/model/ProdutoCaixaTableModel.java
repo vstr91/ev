@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.AbstractTableModel;
-import model.dao.ProdutoDAO;
-import model.dao.ProdutoEventoDAO;
+import model.dao.ProdutoCaixaDAO;
 
 /**
  *
@@ -22,11 +21,8 @@ public class ProdutoCaixaTableModel extends AbstractTableModel {
 
     private List<ProdutoCaixa> produtos;
     private String[] colunas = new String[]{"Produto", "Valor Venda", "Quantidade", "Total"};
-    ProdutoEventoDAO produtoEventoDAO = new ProdutoEventoDAO();
+    ProdutoCaixaDAO produtoCaixaDAO = new ProdutoCaixaDAO();
 
-    /**
-     * Creates a new instance of DevmediaTableModel
-     */
     public ProdutoCaixaTableModel(List<ProdutoCaixa> produtos) {
         this.produtos = produtos;
     }
@@ -94,6 +90,7 @@ public class ProdutoCaixaTableModel extends AbstractTableModel {
         }
         
         fireTableCellUpdated(rowIndex, columnIndex);
+        fireTableCellUpdated(rowIndex, 3);
     }
 
     public Object getValueAt(int rowIndex, int columnIndex) {

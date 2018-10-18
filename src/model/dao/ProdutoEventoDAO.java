@@ -41,19 +41,21 @@ public class ProdutoEventoDAO {
             while(rs.next()){
                 ProdutoEvento produtoEvento = new ProdutoEvento();
                 
+                produtoEvento.setId(rs.getInt(1));
+                
                 Produto produto = new Produto();
-                produto.setId(rs.getInt(1));
+                produto.setId(rs.getInt(2));
                 produto = produtoDAO.carregar(produto);
                 
                 produtoEvento.setProduto(produto);
                 
                 Evento evento = new Evento();
-                evento.setId(rs.getInt(2));
+                evento.setId(rs.getInt(3));
                 evento = eventoDAO.carregar(evento);
                 
                 produtoEvento.setEvento(evento);
-                produtoEvento.setValorCusto(rs.getBigDecimal(3));
-                produtoEvento.setValorVenda(rs.getBigDecimal(4));
+                produtoEvento.setValorCusto(rs.getBigDecimal(4));
+                produtoEvento.setValorVenda(rs.getBigDecimal(5));
                 
                 produtos.add(produtoEvento);
             }
@@ -75,7 +77,7 @@ public class ProdutoEventoDAO {
     
     public List<ProdutoEvento> listarTodosPorEvento(Evento ev) throws SQLException {
 
-        String query = "SELECT p.id, -1 AS evento, valor_custo, valor_venda " +
+        String query = "SELECT p.id, -1 AS evento, valor_custo, valor_venda, pe.id " +
 "FROM produto p LEFT JOIN produto_evento pe ON (p.id = pe.PRODUTO OR pe.PRODUTO IS NULL) " +
 "AND evento = ?";
         PreparedStatement ps = null;
@@ -101,6 +103,7 @@ public class ProdutoEventoDAO {
                 produtoEvento.setEvento(ev);
                 produtoEvento.setValorCusto(rs.getBigDecimal(3));
                 produtoEvento.setValorVenda(rs.getBigDecimal(4));
+                produtoEvento.setId(rs.getInt(5));
                 
                 produtos.add(produtoEvento);
             }
@@ -198,7 +201,7 @@ public class ProdutoEventoDAO {
     
     public ProdutoEvento carregar(ProdutoEvento umProduto) throws SQLException {
 
-        String query = "SELECT produto, evento, valor_custo, valor_venda FROM produto_evento WHERE produto = ? AND evento = ?";
+        String query = "SELECT produto, evento, valor_custo, valor_venda, id FROM produto_evento WHERE produto = ? AND evento = ?";
         PreparedStatement ps = null;
         ProdutoEvento produto = null;
         ProdutoDAO produtoDAO = new ProdutoDAO();
@@ -227,6 +230,7 @@ public class ProdutoEventoDAO {
                 
                 produto.setValorCusto(rs.getBigDecimal(3));
                 produto.setValorVenda(rs.getBigDecimal(4));
+                produto.setId(rs.getInt(5));
             }
             
             ps.close();

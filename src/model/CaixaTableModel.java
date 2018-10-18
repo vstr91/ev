@@ -100,10 +100,10 @@ public class CaixaTableModel extends AbstractTableModel {
                 valueObject = caixaSelecionado.getNome();
                 break;
             case 1:
-                valueObject = "0";
+                valueObject = String.valueOf(caixaSelecionado.getTotalVendido()) == "null" ? "0" : String.valueOf(caixaSelecionado.getTotalVendido());
                 break;
             case 2:
-                valueObject = "0";                
+                valueObject = String.valueOf(caixaSelecionado.getValorTotalVendido()) == "null" ? "0" : String.valueOf(caixaSelecionado.getValorTotalVendido());               
                 break;
             default:
                 System.err.println("Índice inválido para propriedade do bean CaixaEvento.class");

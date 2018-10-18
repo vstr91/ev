@@ -29,19 +29,19 @@ public class ProdutoCaixaDAO {
 
         String query = "SELECT p.ID, pe.EVENTO, pc.CAIXA, pc.QUANTIDADE " +
 "FROM produto p LEFT JOIN produto_evento pe ON pe.PRODUTO = p.ID LEFT JOIN " +
-"PRODUTO_CAIXA pc ON (pc.PRODUTO = pe.PRODUTO AND pc.EVENTO = pe.EVENTO) " +
+"PRODUTO_CAIXA pc ON (pc.PRODUTO_EVENTO = pe.ID AND (pc.CAIXA = ? OR pc.CAIXA IS NULL)) " +
 "WHERE pe.evento = ? AND (pc.CAIXA = ? OR pc.CAIXA IS NULL)";
         PreparedStatement ps = null;
         List<ProdutoCaixa> produtos = new ArrayList<>();
         ProdutoDAO produtoDAO = new ProdutoDAO();
-        EventoDAO eventoDAO = new EventoDAO();
         ProdutoEventoDAO produtoEventoDAO = new ProdutoEventoDAO();
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             ps = con.prepareStatement(query);
-            ps.setInt(1, ev.getEvento().getId());
-            ps.setInt(2, ev.getId());
+            ps.setInt(1, ev.getId());
+            ps.setInt(2, ev.getEvento().getId());
+            ps.setInt(3, ev.getId());
             ResultSet rs = ps.executeQuery();
             
             while(rs.next()){
@@ -60,7 +60,7 @@ public class ProdutoCaixaDAO {
                 produtoCaixa.setProduto(produtoEvento);
                 
                 produtoCaixa.setCaixa(ev);
-                produtoCaixa.setQuantidade(rs.getInt(3));
+                produtoCaixa.setQuantidade(rs.getInt(4));
                 
                 produtos.add(produtoCaixa);
             }
@@ -80,19 +80,18 @@ public class ProdutoCaixaDAO {
         
     }
 
-    public void salvar(ProdutoEvento produtoEvento) throws SQLException {
+    public void salvar(ProdutoCaixa produtoCaixa) throws SQLException {
 
-        String query = "INSERT INTO produto_evento (valor_custo, valor_venda, evento, produto) "
-                + "VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO produto_caixa (produto_evento, caixa, quantidade) "
+                + "VALUES (?, ?, ?)";
         PreparedStatement ps = null;
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             ps = con.prepareStatement(query);
-            ps.setBigDecimal(1, produtoEvento.getValorCusto());
-            ps.setBigDecimal(2,produtoEvento.getValorVenda());
-            ps.setInt(3, produtoEvento.getEvento().getId());
-            ps.setInt(4, produtoEvento.getProduto().getId());
+            ps.setInt(1, produtoCaixa.getProduto().getId());
+            ps.setInt(2,produtoCaixa.getCaixa().getId());
+            ps.setInt(3, produtoCaixa.getQuantidade());
             ps.execute();
             ps.close();
             
@@ -109,32 +108,31 @@ public class ProdutoCaixaDAO {
     
     public void editar(ProdutoCaixa produtoCaixa) throws SQLException {
 
-        String queryCheca = "SELECT * FROM produto_caixa WHERE evento = ? "
-                + "and produto = ?";
+        String queryCheca = "SELECT * FROM produto_caixa WHERE produto_evento = ? "
+                + "and caixa = ?";
         PreparedStatement psCheca = null;
         
-        String query = "UPDATE produto_evento SET valor_custo = ?, valor_venda = ? WHERE evento = ? "
-                + "and produto = ?";
+        String query = "UPDATE produto_caixa SET quantidade = ? WHERE produto_evento = ? "
+                + "and caixa = ?";
         PreparedStatement ps = null;
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             psCheca = con.prepareStatement(queryCheca);
-            psCheca.setInt(1, produtoCaixa.getEvento().getId());
-            psCheca.setInt(2, produtoEvento.getProduto().getId());
+            psCheca.setInt(1, produtoCaixa.getProduto().getId());
+            psCheca.setInt(2, produtoCaixa.getCaixa().getId());
             
             ResultSet rs = psCheca.executeQuery();
             
             if(rs.next()){
                 ps = con.prepareStatement(query);
-                ps.setBigDecimal(1, produtoEvento.getValorCusto());
-                ps.setBigDecimal(2,produtoEvento.getValorVenda());
-                ps.setInt(3, produtoEvento.getEvento().getId());
-                ps.setInt(4, produtoEvento.getProduto().getId());
+                ps.setInt(1, produtoCaixa.getQuantidade());
+                ps.setInt(2,produtoCaixa.getProduto().getId());
+                ps.setInt(3, produtoCaixa.getCaixa().getId());
                 ps.execute();
                 ps.close();
             } else{
-                salvar(produtoEvento);
+                salvar(produtoCaixa);
             }
             
             psCheca.close();

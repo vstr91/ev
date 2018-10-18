@@ -12,7 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import model.Caixa;
 import model.CaixaEvento;
 import model.Evento;
 
@@ -67,13 +66,20 @@ public class CaixaEventoDAO {
     
     public List<CaixaEvento> listarTodosPorEvento(Evento ev) throws SQLException {
 
-        String query = "SELECT * FROM caixa_evento WHERE evento = "+ev.getId();
+        String query = "SELECT c.*, SUM(pc.quantidade), SUM(pe.VALOR_VENDA * pc.QUANTIDADE) " +
+                "FROM caixa_evento c LEFT JOIN " +
+                "     produto_caixa pc ON pc.CAIXA = c.ID LEFT JOIN " +
+                "     produto_evento pe ON pe.ID = pc.PRODUTO_EVENTO AND pe.evento = ? " +
+                "WHERE c.evento = ?" +
+                "GROUP BY c.id, c.NOME, c.NUMERO, c.EVENTO";
         PreparedStatement ps = null;
         List<CaixaEvento> caixas = new ArrayList<>();
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             ps = con.prepareStatement(query);
+            ps.setInt(1, ev.getId());
+            ps.setInt(2, ev.getId());
             ResultSet rs = ps.executeQuery();
             
             while(rs.next()){
@@ -86,6 +92,8 @@ public class CaixaEventoDAO {
                 evento.setId(rs.getInt(4));
                 
                 caixaEvento.setEvento(evento);
+                caixaEvento.setTotalVendido(rs.getInt(5));
+                caixaEvento.setValorTotalVendido(rs.getBigDecimal(6));
                 
                 caixas.add(caixaEvento);
             }

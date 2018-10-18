@@ -5,8 +5,14 @@
  */
 package view;
 
-import model.Caixa;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.CaixaEvento;
+import model.ProdutoCaixa;
+import model.ProdutoCaixaTableModel;
+import model.dao.ProdutoCaixaDAO;
 
 /**
  *
@@ -14,7 +20,10 @@ import model.CaixaEvento;
 public class CaixaView extends javax.swing.JDialog {
 
     CaixaEvento caixa;
-
+    List<ProdutoCaixa> produtos;
+    ProdutoCaixaDAO produtoCaixaDAO = new ProdutoCaixaDAO();
+    ProdutoCaixaTableModel tableModelProdutoCaixa;
+    
     public CaixaEvento getCaixa() {
         return caixa;
     }
@@ -30,6 +39,15 @@ public class CaixaView extends javax.swing.JDialog {
         initComponents();
         this.caixa = caixa;
         labelCaixa.setText(caixa.getNome());
+        
+        try {
+            produtos = produtoCaixaDAO.listarTodosPorCaixaEvento(caixa);
+            tableModelProdutoCaixa = new ProdutoCaixaTableModel(produtos);
+            tableProdutos.setModel(tableModelProdutoCaixa);
+        } catch (SQLException ex) {
+            Logger.getLogger(ProdutoEventoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 
     /**
@@ -65,6 +83,11 @@ public class CaixaView extends javax.swing.JDialog {
         btnCadastrar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -263,6 +286,14 @@ public class CaixaView extends javax.swing.JDialog {
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnCadastrarActionPerformed
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        FechamentoView fechamentoView = new FechamentoView(caixa.getEvento());
+        fechamentoView.setLocationRelativeTo(this);
+        fechamentoView.setAlwaysOnTop(true);
+        fechamentoView.setModal(true);
+        fechamentoView.setVisible(true);
+    }//GEN-LAST:event_formWindowClosed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField TextFieldVale;

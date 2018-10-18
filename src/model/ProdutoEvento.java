@@ -13,11 +13,20 @@ import java.math.BigDecimal;
  */
 public class ProdutoEvento {
 
+    private Integer id;
     private Produto produto;
     private Evento evento;
     private BigDecimal valorCusto;
     private BigDecimal valorVenda;
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+    
     public Produto getProduto() {
         return produto;
     }

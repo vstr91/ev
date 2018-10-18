@@ -6,6 +6,8 @@
 
 package model;
 
+import java.math.BigDecimal;
+
 /**
  *
  */
@@ -15,6 +17,25 @@ public class CaixaEvento {
     private String nome;
     private Integer numero;
     private Evento evento;
+    
+    private Integer totalVendido;
+    private BigDecimal valorTotalVendido;
+
+    public Integer getTotalVendido() {
+        return totalVendido;
+    }
+
+    public void setTotalVendido(Integer totalVendido) {
+        this.totalVendido = totalVendido;
+    }
+
+    public BigDecimal getValorTotalVendido() {
+        return valorTotalVendido;
+    }
+
+    public void setValorTotalVendido(BigDecimal valorTotalVendido) {
+        this.valorTotalVendido = valorTotalVendido;
+    }
 
     public Integer getId() {
         return id;
