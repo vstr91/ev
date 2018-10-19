@@ -31,6 +31,8 @@ public class ProdutoEventoView extends javax.swing.JDialog {
     public ProdutoEventoView(Evento e) {
         initComponents();
         this.evento = e;
+        
+        this.setTitle("Produtos à Venda no Evento "+e.getNome());
 
         try {
             produtos = produtoEventoDAO.listarTodosPorEvento(evento);
@@ -58,6 +60,7 @@ public class ProdutoEventoView extends javax.swing.JDialog {
         btnNovoProduto = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Produtos à Venda no Evento");
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosed(java.awt.event.WindowEvent evt) {
                 formWindowClosed(evt);

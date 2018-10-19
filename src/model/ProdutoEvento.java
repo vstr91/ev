@@ -18,6 +18,7 @@ public class ProdutoEvento {
     private Evento evento;
     private BigDecimal valorCusto;
     private BigDecimal valorVenda;
+    private BigDecimal estoque;
 
     public Integer getId() {
         return id;
@@ -57,6 +58,14 @@ public class ProdutoEvento {
 
     public void setValorVenda(BigDecimal valorVenda) {
         this.valorVenda = valorVenda;
+    }
+
+    public BigDecimal getEstoque() {
+        return estoque;
+    }
+
+    public void setEstoque(BigDecimal estoque) {
+        this.estoque = estoque;
     }
     
 }

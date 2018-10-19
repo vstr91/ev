@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,10 +22,11 @@ import model.BarracaTableModel;
 import model.CaixaEvento;
 import model.CaixaTableModel;
 import model.Despesa;
+import model.DespesaTableModel;
 import model.Evento;
 import model.dao.BarracaEventoDAO;
 import model.dao.CaixaEventoDAO;
-import model.dao.ProdutoDAO;
+import model.dao.DespesaDAO;
 import org.joda.time.format.DateTimeFormat;
 
 /**
@@ -41,6 +43,11 @@ public class FechamentoView extends javax.swing.JDialog {
     BarracaEventoDAO barracaEventoDAO = new BarracaEventoDAO();
     List<BarracaEvento> barracas;
     Despesa despesa;
+    List<Despesa> despesas;
+    DespesaTableModel tableModelDespesa;
+    DespesaDAO despesaDAO = new DespesaDAO();
+    boolean flagEdicao = false;
+    Integer idDespesa;
 
     BigDecimal totalVendaCaixas = BigDecimal.ZERO;
 
@@ -93,6 +100,12 @@ public class FechamentoView extends javax.swing.JDialog {
                 tableVendasBarracas.setModel(tableModelBarraca);
                 labelVendasBarracas.setText(String.valueOf(tableModelBarraca.getQtdTotalVendida()));
 
+                //Despesas
+                despesas = despesaDAO.listarTodosPorEvento(evento);
+                tableModelDespesa = new DespesaTableModel(despesas);
+                tableDespesas.setModel(tableModelDespesa);
+                tableDespesas.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
             } catch (SQLException ex) {
                 Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -143,6 +156,7 @@ public class FechamentoView extends javax.swing.JDialog {
         jLabel11 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
+        tableDespesas = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
         jLabel15 = new javax.swing.JLabel();
         textFieldNomeDespesa = new javax.swing.JTextField();
@@ -273,6 +287,24 @@ public class FechamentoView extends javax.swing.JDialog {
 
         jLabel13.setText("Despesas (B)");
 
+        tableDespesas.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        tableDespesas.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableDespesasMouseClicked(evt);
+            }
+        });
+        jScrollPane3.setViewportView(tableDespesas);
+
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Cadastrar Despesa (B)"));
 
         jLabel15.setText("Nome:");
@@ -289,14 +321,44 @@ public class FechamentoView extends javax.swing.JDialog {
 
         jLabel21.setText("Obs.:");
 
-        labelValorTotal.setText("100");
+        textFieldValorUnitario.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textFieldValorUnitarioFocusLost(evt);
+            }
+        });
 
-        labelFaltaPagar.setText("30");
+        labelValorTotal.setText("0");
+
+        labelFaltaPagar.setText("0");
+
+        textFieldValorPago.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textFieldValorPagoFocusLost(evt);
+            }
+        });
 
         btnDespesa.setText("Cadastrar Despesa");
         btnDespesa.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDespesaActionPerformed(evt);
+            }
+        });
+
+        spinnerQuantidade.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                spinnerQuantidadeStateChanged(evt);
+            }
+        });
+        spinnerQuantidade.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                spinnerQuantidadeFocusLost(evt);
+            }
+        });
+        spinnerQuantidade.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+                spinnerQuantidadeCaretPositionChanged(evt);
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
             }
         });
 
@@ -466,8 +528,21 @@ public class FechamentoView extends javax.swing.JDialog {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel1)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(labelVendasBar))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel2)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(labelVendasBarracas))
+                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 441, Short.MAX_VALUE)
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                                .addGap(0, 11, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jScrollPane4)
+                                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -498,24 +573,11 @@ public class FechamentoView extends javax.swing.JDialog {
                                                 .addComponent(jLabel14)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                                 .addComponent(textFieldBarracaChurros, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGap(0, 0, Short.MAX_VALUE))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(btnRelatorio)
                                         .addGap(0, 0, Short.MAX_VALUE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(jScrollPane2)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel1)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(labelVendasBar))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel2)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(labelVendasBarracas))
-                                    .addComponent(jScrollPane1))
-                                .addGap(0, 17, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(btnRelatorio)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
@@ -524,9 +586,7 @@ public class FechamentoView extends javax.swing.JDialog {
                                     .addComponent(jScrollPane3)
                                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnSalvar)))
+                            .addComponent(btnSalvar, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(btnProdutos)
@@ -624,6 +684,12 @@ public class FechamentoView extends javax.swing.JDialog {
 
     private void btnDespesaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDespesaActionPerformed
 
+        try {
+            spinnerQuantidade.commitEdit();
+        } catch (ParseException ex) {
+            Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         if (textFieldNomeDespesa.getText().trim().isEmpty() || textFieldValorUnitario.getText().trim().isEmpty()
                 || textFieldValorPago.getText().trim().isEmpty() || (Integer) spinnerQuantidade.getValue() < 1) {
             JOptionPane.showMessageDialog(this, "Por Favor insira todos os dados.", "Dados não Informados", JOptionPane.ERROR_MESSAGE);
@@ -635,6 +701,18 @@ public class FechamentoView extends javax.swing.JDialog {
             textFieldValorPago.setText("");
             textFieldObservacao.setText("");
             spinnerQuantidade.setValue(0);
+            labelValorTotal.setText("0");
+            labelFaltaPagar.setText("0");
+
+            if (flagEdicao) {
+                carregarRegistrosTabela();
+                flagEdicao = false;
+            } else {
+                tableModelDespesa.addDespesa(despesa);
+            }
+
+            btnDespesa.setText("Cadastrar Despesa");
+
         }
 
     }//GEN-LAST:event_btnDespesaActionPerformed
@@ -668,6 +746,82 @@ public class FechamentoView extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_tableVendasBarMouseClicked
 
+    private void tableDespesasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableDespesasMouseClicked
+        if (evt.getClickCount() >= 2) {
+            int linha = tableDespesas.getSelectedRow();
+
+            Despesa d = despesas.get(linha);
+
+            flagEdicao = true;
+
+            textFieldNomeDespesa.setText(d.getNome());
+            textFieldObservacao.setText(d.getObservacao());
+            spinnerQuantidade.setValue(d.getQuantidade());
+
+            try {
+                spinnerQuantidade.commitEdit();
+            } catch (ParseException ex) {
+                Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            textFieldValorUnitario.setText(d.getValorUnitario().toString());
+            textFieldValorPago.setText(d.getValorPago().toString());
+
+            labelValorTotal.setText(d.getValorUnitario().multiply(new BigDecimal(d.getQuantidade())).toString());
+            labelFaltaPagar.setText(new BigDecimal(labelValorTotal.getText()).subtract(d.getValorPago()).toString());
+
+            idDespesa = d.getId();
+            btnDespesa.setText("Editar Despesa");
+
+        }
+    }//GEN-LAST:event_tableDespesasMouseClicked
+
+    private void spinnerQuantidadeFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_spinnerQuantidadeFocusLost
+
+    }//GEN-LAST:event_spinnerQuantidadeFocusLost
+
+    private void textFieldValorUnitarioFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldValorUnitarioFocusLost
+        String valorUnitario = textFieldValorUnitario.getText();
+        Integer quantidade = (Integer) spinnerQuantidade.getValue();
+
+        labelValorTotal.setText(new BigDecimal(valorUnitario)
+                .multiply(new BigDecimal(String.valueOf(quantidade))).toString());
+
+        String valorTotal = labelValorTotal.getText();
+        String valorPago = textFieldValorPago.getText();
+
+        if (!valorTotal.isEmpty() && !valorPago.isEmpty()) {
+            labelFaltaPagar.setText(new BigDecimal(valorTotal).subtract(new BigDecimal(valorPago)).toString());
+        }
+
+    }//GEN-LAST:event_textFieldValorUnitarioFocusLost
+
+    private void textFieldValorPagoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldValorPagoFocusLost
+        labelFaltaPagar.setText(new BigDecimal(labelValorTotal.getText()).subtract(new BigDecimal(textFieldValorPago.getText())).toString());
+    }//GEN-LAST:event_textFieldValorPagoFocusLost
+
+    private void spinnerQuantidadeCaretPositionChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_spinnerQuantidadeCaretPositionChanged
+
+    }//GEN-LAST:event_spinnerQuantidadeCaretPositionChanged
+
+    private void spinnerQuantidadeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinnerQuantidadeStateChanged
+        if (!textFieldValorUnitario.getText().trim().isEmpty()) {
+
+            String valorUnitario = textFieldValorUnitario.getText();
+            Integer quantidade = (Integer) spinnerQuantidade.getValue();
+
+            labelValorTotal.setText(new BigDecimal(valorUnitario)
+                    .multiply(new BigDecimal(String.valueOf(quantidade))).toString());
+
+            String valorTotal = labelValorTotal.getText();
+            String valorPago = textFieldValorPago.getText();
+
+            if (!valorTotal.isEmpty() && !valorPago.isEmpty()) {
+                labelFaltaPagar.setText(new BigDecimal(valorTotal).subtract(new BigDecimal(valorPago)).toString());
+            }
+        }
+    }//GEN-LAST:event_spinnerQuantidadeStateChanged
+
     private void salvarDespesa() {
         //SALVA PRODUTO
         despesa = new Despesa();
@@ -682,26 +836,35 @@ public class FechamentoView extends javax.swing.JDialog {
             despesaDAO = new DespesaDAO();
         }
 
-        if (flagEdicao && idProduto != null) {
-            produto.setId(idProduto);
+        if (flagEdicao && idDespesa != null) {
+            despesa.setId(idDespesa);
             try {
-                produtoDAO.editar(produto);
+                despesaDAO.editar(despesa);
             } catch (SQLException ex) {
                 Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
 //                flagEdicao = false;
-                idProduto = null;
-                btnCadastrar.setText("Cadastrar");
-                btnSalvarEFechar.setText("Cadastrar e Fechar");
+                idDespesa = null;
             }
         } else {
             try {
-                produtoDAO.salvar(produto);
+                despesaDAO.salvar(despesa);
             } catch (SQLException ex) {
                 Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
+    }
+
+    private void carregarRegistrosTabela() {
+        try {
+            despesas = despesaDAO.listarTodosPorEvento(evento);
+        } catch (SQLException ex) {
+            Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        tableModelDespesa = new DespesaTableModel(despesas);
+        tableDespesas.setModel(tableModelDespesa);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -747,6 +910,7 @@ public class FechamentoView extends javax.swing.JDialog {
     private javax.swing.JLabel labelVendasBarracas;
     private javax.swing.JSpinner spinnerQuantidade;
     private javax.swing.JTable tableConsumoCamarim;
+    private javax.swing.JTable tableDespesas;
     private javax.swing.JTable tableVendasBar;
     private javax.swing.JTable tableVendasBarracas;
     private javax.swing.JTextField textFieldBarracaChurros;

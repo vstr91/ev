@@ -56,6 +56,7 @@ public class ProdutoEventoDAO {
                 produtoEvento.setEvento(evento);
                 produtoEvento.setValorCusto(rs.getBigDecimal(4));
                 produtoEvento.setValorVenda(rs.getBigDecimal(5));
+                produtoEvento.setEstoque(rs.getBigDecimal(6));
                 
                 produtos.add(produtoEvento);
             }
@@ -77,7 +78,7 @@ public class ProdutoEventoDAO {
     
     public List<ProdutoEvento> listarTodosPorEvento(Evento ev) throws SQLException {
 
-        String query = "SELECT p.id, -1 AS evento, valor_custo, valor_venda, pe.id " +
+        String query = "SELECT p.id, -1 AS evento, valor_custo, valor_venda, pe.id, pe.estoque " +
 "FROM produto p LEFT JOIN produto_evento pe ON (p.id = pe.PRODUTO OR pe.PRODUTO IS NULL) " +
 "AND evento = ?";
         PreparedStatement ps = null;
@@ -104,6 +105,7 @@ public class ProdutoEventoDAO {
                 produtoEvento.setValorCusto(rs.getBigDecimal(3));
                 produtoEvento.setValorVenda(rs.getBigDecimal(4));
                 produtoEvento.setId(rs.getInt(5));
+                produtoEvento.setEstoque(rs.getBigDecimal(6));
                 
                 produtos.add(produtoEvento);
             }
@@ -125,8 +127,8 @@ public class ProdutoEventoDAO {
 
     public void salvar(ProdutoEvento produtoEvento) throws SQLException {
 
-        String query = "INSERT INTO produto_evento (valor_custo, valor_venda, evento, produto) "
-                + "VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO produto_evento (valor_custo, valor_venda, evento, produto, estoque) "
+                + "VALUES (?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
 
         try (Connection con = new ConnectionFactory().getConnection()) {
@@ -136,6 +138,7 @@ public class ProdutoEventoDAO {
             ps.setBigDecimal(2,produtoEvento.getValorVenda());
             ps.setInt(3, produtoEvento.getEvento().getId());
             ps.setInt(4, produtoEvento.getProduto().getId());
+            ps.setBigDecimal(4, produtoEvento.getEstoque());
             ps.execute();
             ps.close();
             
@@ -156,7 +159,7 @@ public class ProdutoEventoDAO {
                 + "and produto = ?";
         PreparedStatement psCheca = null;
         
-        String query = "UPDATE produto_evento SET valor_custo = ?, valor_venda = ? WHERE evento = ? "
+        String query = "UPDATE produto_evento SET valor_custo = ?, valor_venda = ?, estoque = ? WHERE evento = ? "
                 + "and produto = ?";
         PreparedStatement ps = null;
 
@@ -172,8 +175,9 @@ public class ProdutoEventoDAO {
                 ps = con.prepareStatement(query);
                 ps.setBigDecimal(1, produtoEvento.getValorCusto());
                 ps.setBigDecimal(2,produtoEvento.getValorVenda());
-                ps.setInt(3, produtoEvento.getEvento().getId());
-                ps.setInt(4, produtoEvento.getProduto().getId());
+                ps.setBigDecimal(3,produtoEvento.getEstoque());
+                ps.setInt(4, produtoEvento.getEvento().getId());
+                ps.setInt(5, produtoEvento.getProduto().getId());
                 ps.execute();
                 ps.close();
             } else{
@@ -201,7 +205,7 @@ public class ProdutoEventoDAO {
     
     public ProdutoEvento carregar(ProdutoEvento umProduto) throws SQLException {
 
-        String query = "SELECT produto, evento, valor_custo, valor_venda, id FROM produto_evento WHERE produto = ? AND evento = ?";
+        String query = "SELECT produto, evento, valor_custo, valor_venda, id, estoque FROM produto_evento WHERE produto = ? AND evento = ?";
         PreparedStatement ps = null;
         ProdutoEvento produto = null;
         ProdutoDAO produtoDAO = new ProdutoDAO();
@@ -231,6 +235,7 @@ public class ProdutoEventoDAO {
                 produto.setValorCusto(rs.getBigDecimal(3));
                 produto.setValorVenda(rs.getBigDecimal(4));
                 produto.setId(rs.getInt(5));
+                produto.setEstoque(rs.getBigDecimal(6));
             }
             
             ps.close();

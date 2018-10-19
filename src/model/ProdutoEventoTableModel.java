@@ -21,7 +21,7 @@ import model.dao.ProdutoEventoDAO;
 public class ProdutoEventoTableModel extends AbstractTableModel {
 
     private List<ProdutoEvento> produtos;
-    private String[] colunas = new String[]{"Nome", "Valor Custo", "Valor Venda"};
+    private String[] colunas = new String[]{"Nome", "Valor Custo", "Valor Venda", "Estoque"};
     ProdutoEventoDAO produtoEventoDAO = new ProdutoEventoDAO();
 
     /**
@@ -60,6 +60,7 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
         produto.setProduto(aValue.getProduto());
         produto.setValorCusto(aValue.getValorCusto());
         produto.setValorVenda(aValue.getValorVenda());
+        produto.setEstoque(aValue.getEstoque());
 
 //        fireTableCellUpdated(rowIndex, 0);
         fireTableCellUpdated(rowIndex, 0);
@@ -85,6 +86,9 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
                 break;
             case 2:
                 produto.setValorVenda(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
+                break;
+            case 3:
+                produto.setEstoque(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
                 break;
             default:
                 System.err.println("Índice da coluna inválido");
@@ -116,6 +120,9 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
             case 2:
                 valueObject = String.valueOf(produtoSelecionado.getValorVenda());
                 break;
+            case 3:
+                valueObject = String.valueOf(produtoSelecionado.getEstoque());
+                break;
             default:
                 System.err.println("Índice inválido para propriedade do bean ProdutoEvento.class");
         }
@@ -131,6 +138,7 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
                 return false;
             case 1:
             case 2:
+            case 3:
                 return true;
             default:
                 return false;
