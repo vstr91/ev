@@ -11,8 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import model.Produto;
 import model.UnidadeVenda;
 
@@ -25,15 +23,16 @@ public class ProdutoDAO {
 
     }
     
-    public List<Produto> listarTodos() throws SQLException {
+    public List<Produto> listarTodos(int tipo) throws SQLException {
 
-        String query = "SELECT * FROM produto";
+        String query = "SELECT * FROM produto WHERE tipo = ?";
         PreparedStatement ps = null;
         List<Produto> produtos = new ArrayList<>();
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             ps = con.prepareStatement(query);
+            ps.setInt(0, tipo);
             ResultSet rs = ps.executeQuery();
             UnidadeVendaDAO unidadeVendaDAO = new UnidadeVendaDAO();
             
@@ -67,7 +66,7 @@ public class ProdutoDAO {
 
     public void salvar(Produto produto) throws SQLException {
 
-        String query = "INSERT INTO produto (nome, unidade_venda, doses, observacao) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO produto (nome, unidade_venda, doses, observacao, tipo) VALUES (?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
 
         try (Connection con = new ConnectionFactory().getConnection()) {
@@ -77,6 +76,7 @@ public class ProdutoDAO {
             ps.setInt(2, produto.getTipoUnidade().getId());
             ps.setInt(3, produto.getDoses());
             ps.setString(4, produto.getObservacao());
+            ps.setInt(5, produto.getTipo());
             ps.execute();
             ps.close();
             
@@ -94,7 +94,7 @@ public class ProdutoDAO {
     public void editar(Produto produto) throws SQLException {
 
         String query = "UPDATE produto SET nome = ?, unidade_venda = ?, doses = ?, "
-                + "observacao = ? WHERE id = ?";
+                + "observacao = ?, tipo = ? WHERE id = ?";
         PreparedStatement ps = null;
 
         try (Connection con = new ConnectionFactory().getConnection()) {
@@ -104,7 +104,8 @@ public class ProdutoDAO {
             ps.setInt(2, produto.getTipoUnidade().getId());
             ps.setInt(3, produto.getDoses());
             ps.setString(4, produto.getObservacao());
-            ps.setInt(5, produto.getId());
+            ps.setInt(5, produto.getTipo());
+            ps.setInt(6, produto.getId());
             ps.execute();
             ps.close();
             
@@ -143,6 +144,7 @@ public class ProdutoDAO {
                 produto.setTipoUnidade(unidadeVenda);
                 produto.setDoses(rs.getInt(4));
                 produto.setObservacao(rs.getString(5));
+                produto.setTipo(rs.getInt(6));
             }
             
             ps.close();

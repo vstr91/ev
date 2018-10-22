@@ -5,6 +5,15 @@
  */
 package view;
 
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import model.BarracaEvento;
+import model.ProdutoCaixaTableModel;
+import model.dao.BarracaEventoDAO;
+import model.dao.ProdutoCaixaDAO;
+
 /**
  *
  */
@@ -13,8 +22,26 @@ public class BarracaView extends javax.swing.JDialog {
     /**
      * Creates new form BarracaView
      */
-    public BarracaView() {
+    
+    BarracaEvento barraca;
+    List<BarracaEvento> produtos;
+    BarracaEventoDAO barracaEventoDAO = new BarracaEventoDAO();
+    
+    public BarracaView(BarracaEvento barraca) {
         initComponents();
+        this.barraca = barraca;
+        textFieldNome.setVisible(false);
+        jLabel2.setVisible(false);
+        labelNome.setText(barraca.getNome());
+        
+        try {
+            produtos = barracaEventoDAO.listarTodosPorEvento(barraca.getEvento());
+//            tableModelProdutoBarraca = new ProdutoBarracaTableModel(produtos);
+//            tableProdutos.setModel(tableModelProdutoBarraca);
+        } catch (SQLException ex) {
+            Logger.getLogger(ProdutoEventoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 
     /**
@@ -27,7 +54,7 @@ public class BarracaView extends javax.swing.JDialog {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        labelNome = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         textFieldNome = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
@@ -41,7 +68,7 @@ public class BarracaView extends javax.swing.JDialog {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jLabel1.setText("Barraca 001");
+        labelNome.setText("Barraca 001");
 
         jLabel2.setText("Nome");
 
@@ -92,7 +119,7 @@ public class BarracaView extends javax.swing.JDialog {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(155, 155, 155)
-                                .addComponent(jLabel1))
+                                .addComponent(labelNome))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(jLabel2)))
@@ -118,7 +145,7 @@ public class BarracaView extends javax.swing.JDialog {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addComponent(labelNome)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -159,12 +186,12 @@ public class BarracaView extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCadastrar;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel labelNome;
     private javax.swing.JLabel labelVendas;
     private javax.swing.JTable tableProdutos;
     private javax.swing.JTextField textFieldNome;

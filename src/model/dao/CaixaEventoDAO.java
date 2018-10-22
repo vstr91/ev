@@ -71,7 +71,7 @@ public class CaixaEventoDAO {
                 "     produto_caixa pc ON pc.CAIXA = c.ID LEFT JOIN " +
                 "     produto_evento pe ON pe.ID = pc.PRODUTO_EVENTO AND pe.evento = ? " +
                 "WHERE c.evento = ?" +
-                "GROUP BY c.id, c.NOME, c.NUMERO, c.EVENTO";
+                " GROUP BY c.id, c.NOME, c.NUMERO, c.EVENTO, c.VENDA_DEBITO, c.VENDA_CREDITO, c.VENDA_DINHEIRO, c.VENDA_VALE";
         PreparedStatement ps = null;
         List<CaixaEvento> caixas = new ArrayList<>();
 
@@ -92,8 +92,14 @@ public class CaixaEventoDAO {
                 evento.setId(rs.getInt(4));
                 
                 caixaEvento.setEvento(evento);
-                caixaEvento.setTotalVendido(rs.getInt(5));
-                caixaEvento.setValorTotalVendido(rs.getBigDecimal(6));
+                
+                caixaEvento.setVendaDebito(rs.getBigDecimal(5));
+                caixaEvento.setVendaCredito(rs.getBigDecimal(6));
+                caixaEvento.setVendaDinheiro(rs.getBigDecimal(7));
+                caixaEvento.setVendaVale(rs.getBigDecimal(8));
+                
+                caixaEvento.setTotalVendido(rs.getInt(9));
+                caixaEvento.setValorTotalVendido(rs.getBigDecimal(10));
                 
                 caixas.add(caixaEvento);
             }
@@ -140,7 +146,8 @@ public class CaixaEventoDAO {
     
     public void editar(CaixaEvento caixaEvento) throws SQLException {
 
-        String query = "UPDATE caixa_evento SET nome = ?, numero = ?, evento = ? WHERE id = ?";
+        String query = "UPDATE caixa_evento SET nome = ?, numero = ?, evento = ?, "
+                + "venda_debito = ?, venda_credito = ?, venda_dinheiro = ?, venda_vale = ? WHERE id = ?";
         PreparedStatement ps = null;
 
         try (Connection con = new ConnectionFactory().getConnection()) {
@@ -149,7 +156,11 @@ public class CaixaEventoDAO {
             ps.setString(1, caixaEvento.getNome());
             ps.setInt(2,caixaEvento.getNumero());
             ps.setInt(3, caixaEvento.getEvento().getId());
-            ps.setInt(4, caixaEvento.getId());
+            ps.setBigDecimal(4, caixaEvento.getVendaDebito());
+            ps.setBigDecimal(5, caixaEvento.getVendaCredito());
+            ps.setBigDecimal(6, caixaEvento.getVendaDinheiro());
+            ps.setBigDecimal(7, caixaEvento.getVendaVale());
+            ps.setInt(8, caixaEvento.getId());
             ps.execute();
             ps.close();
             

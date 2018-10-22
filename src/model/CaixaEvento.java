@@ -20,6 +20,11 @@ public class CaixaEvento {
     
     private Integer totalVendido;
     private BigDecimal valorTotalVendido;
+    
+    private BigDecimal vendaDebito;
+    private BigDecimal vendaCredito;
+    private BigDecimal vendaDinheiro;
+    private BigDecimal vendaVale;
 
     public Integer getTotalVendido() {
         return totalVendido;
@@ -67,6 +72,38 @@ public class CaixaEvento {
 
     public void setEvento(Evento evento) {
         this.evento = evento;
+    }
+
+    public BigDecimal getVendaDebito() {
+        return vendaDebito;
+    }
+
+    public void setVendaDebito(BigDecimal vendaDebito) {
+        this.vendaDebito = vendaDebito;
+    }
+
+    public BigDecimal getVendaCredito() {
+        return vendaCredito;
+    }
+
+    public void setVendaCredito(BigDecimal vendaCredito) {
+        this.vendaCredito = vendaCredito;
+    }
+
+    public BigDecimal getVendaDinheiro() {
+        return vendaDinheiro;
+    }
+
+    public void setVendaDinheiro(BigDecimal vendaDinheiro) {
+        this.vendaDinheiro = vendaDinheiro;
+    }
+
+    public BigDecimal getVendaVale() {
+        return vendaVale;
+    }
+
+    public void setVendaVale(BigDecimal vendaVale) {
+        this.vendaVale = vendaVale;
     }
     
 }

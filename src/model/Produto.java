@@ -27,6 +27,9 @@ public class Produto {
     private UnidadeVenda tipoUnidade;
     private Integer doses;
     private String observacao;
+    
+    // 0 = bar | 1 = barraca
+    private int tipo;
 
     public Produto() {
     }
@@ -69,6 +72,14 @@ public class Produto {
 
     public void setObservacao(String observacao) {
         this.observacao = observacao;
+    }
+
+    public int getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(int tipo) {
+        this.tipo = tipo;
     }
     
 }

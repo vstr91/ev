@@ -5,13 +5,18 @@
  */
 package view;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import model.CaixaEvento;
 import model.ProdutoCaixa;
 import model.ProdutoCaixaTableModel;
+import model.dao.CaixaEventoDAO;
 import model.dao.ProdutoCaixaDAO;
 
 /**
@@ -22,8 +27,16 @@ public class CaixaView extends javax.swing.JDialog {
     CaixaEvento caixa;
     List<ProdutoCaixa> produtos;
     ProdutoCaixaDAO produtoCaixaDAO = new ProdutoCaixaDAO();
+    CaixaEventoDAO caixaEventoDAO = new CaixaEventoDAO();
     ProdutoCaixaTableModel tableModelProdutoCaixa;
+    BigDecimal total;
+    Integer totalUnidades;
     
+    BigDecimal vendaDebito = BigDecimal.ZERO;
+    BigDecimal vendaCredito = BigDecimal.ZERO;
+    BigDecimal vendaDinheiro = BigDecimal.ZERO;
+    BigDecimal vendaVale = BigDecimal.ZERO;
+
     public CaixaEvento getCaixa() {
         return caixa;
     }
@@ -31,7 +44,7 @@ public class CaixaView extends javax.swing.JDialog {
     public void setCaixa(CaixaEvento caixa) {
         this.caixa = caixa;
     }
-    
+
     /**
      * Creates new form BarView
      */
@@ -40,14 +53,52 @@ public class CaixaView extends javax.swing.JDialog {
         this.caixa = caixa;
         labelCaixa.setText(caixa.getNome());
         
+        textFieldCredito.setText(caixa.getVendaCredito().toString());
+        textFieldDebito.setText(caixa.getVendaDebito().toString());
+        textFieldDinheiro.setText(caixa.getVendaDinheiro().toString());
+        textFieldVale.setText(caixa.getVendaVale().toString());
+
         try {
             produtos = produtoCaixaDAO.listarTodosPorCaixaEvento(caixa);
             tableModelProdutoCaixa = new ProdutoCaixaTableModel(produtos);
             tableProdutos.setModel(tableModelProdutoCaixa);
+            textFieldNome.setVisible(false);
+            jLabel1.setVisible(false);
         } catch (SQLException ex) {
             Logger.getLogger(ProdutoEventoView.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        total = BigDecimal.ZERO;
+        totalUnidades = 0;
+
+        for (ProdutoCaixa p : produtos) {
+            total = total.add(p.getProduto().getValorVenda().multiply(new BigDecimal(p.getQuantidade())));
+            totalUnidades = totalUnidades + p.getQuantidade();
+        }
+
+        labelTotalVendas.setText(total.toString());
+        labelUnidades.setText(String.valueOf(totalUnidades));
+
+        tableProdutos.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                total = BigDecimal.ZERO;
+                totalUnidades = 0;
+
+                for (ProdutoCaixa p : produtos) {
+                    total = total.add(p.getProduto().getValorVenda().multiply(new BigDecimal(p.getQuantidade())));
+                    totalUnidades = totalUnidades + p.getQuantidade();
+                }
+
+                labelTotalVendas.setText(total.toString());
+                labelUnidades.setText(String.valueOf(totalUnidades));
+                
+                recalculaTotais();
+            }
+        });
         
+        recalculaTotais();
+
     }
 
     /**
@@ -72,7 +123,7 @@ public class CaixaView extends javax.swing.JDialog {
         textFieldCredito = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         textFieldDinheiro = new javax.swing.JTextField();
-        TextFieldVale = new javax.swing.JTextField();
+        textFieldVale = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         labelTotal = new javax.swing.JLabel();
@@ -81,8 +132,11 @@ public class CaixaView extends javax.swing.JDialog {
         jLabel9 = new javax.swing.JLabel();
         labelTotalVendas = new javax.swing.JLabel();
         btnCadastrar = new javax.swing.JButton();
+        labelUnidades = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Vendas por Caixa");
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosed(java.awt.event.WindowEvent evt) {
                 formWindowClosed(evt);
@@ -124,9 +178,33 @@ public class CaixaView extends javax.swing.JDialog {
 
         jLabel3.setText("Débito");
 
+        textFieldDebito.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textFieldDebitoFocusLost(evt);
+            }
+        });
+
         jLabel4.setText("Crédito");
 
+        textFieldCredito.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textFieldCreditoFocusLost(evt);
+            }
+        });
+
         jLabel5.setText("Dinheiro");
+
+        textFieldDinheiro.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textFieldDinheiroFocusLost(evt);
+            }
+        });
+
+        textFieldVale.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textFieldValeFocusLost(evt);
+            }
+        });
 
         jLabel6.setText("Vale");
 
@@ -148,6 +226,10 @@ public class CaixaView extends javax.swing.JDialog {
                 btnCadastrarActionPerformed(evt);
             }
         });
+
+        labelUnidades.setText("10");
+
+        jLabel10.setText("unidades");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -206,14 +288,19 @@ public class CaixaView extends javax.swing.JDialog {
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel6)
-                                    .addComponent(TextFieldVale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addComponent(textFieldVale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(labelUnidades)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel10)
+                                .addGap(167, 167, 167)))
                         .addGap(25, 25, 25))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(btnCadastrar)
                         .addContainerGap())))
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {TextFieldVale, textFieldCredito, textFieldDebito, textFieldDinheiro});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {textFieldCredito, textFieldDebito, textFieldDinheiro, textFieldVale});
 
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -231,7 +318,9 @@ public class CaixaView extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(labelTotalVendas))
+                    .addComponent(labelTotalVendas)
+                    .addComponent(labelUnidades)
+                    .addComponent(jLabel10))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -249,7 +338,7 @@ public class CaixaView extends javax.swing.JDialog {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addGap(6, 6, 6)
-                        .addComponent(TextFieldVale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(textFieldVale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
@@ -284,7 +373,21 @@ public class CaixaView extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
-        // TODO add your handling code here:
+        caixa.setTotalVendido(totalUnidades);
+        caixa.setValorTotalVendido(total);
+        
+        caixa.setVendaDebito(vendaDebito);
+        caixa.setVendaCredito(vendaCredito);
+        caixa.setVendaDinheiro(vendaDinheiro);
+        caixa.setVendaVale(vendaVale);
+        
+        try {
+            caixaEventoDAO.editar(caixa);
+            JOptionPane.showMessageDialog(this, "Dados cadastrados com sucesso!", "Caixa Cadastrado", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+        } catch (SQLException ex) {
+            Logger.getLogger(CaixaView.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
@@ -295,10 +398,56 @@ public class CaixaView extends javax.swing.JDialog {
         fechamentoView.setVisible(true);
     }//GEN-LAST:event_formWindowClosed
 
+    private void textFieldDebitoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldDebitoFocusLost
+        recalculaTotais();
+    }//GEN-LAST:event_textFieldDebitoFocusLost
+
+    private void textFieldCreditoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldCreditoFocusLost
+        recalculaTotais();
+    }//GEN-LAST:event_textFieldCreditoFocusLost
+
+    private void textFieldDinheiroFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldDinheiroFocusLost
+        recalculaTotais();
+    }//GEN-LAST:event_textFieldDinheiroFocusLost
+
+    private void textFieldValeFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldValeFocusLost
+        recalculaTotais();
+    }//GEN-LAST:event_textFieldValeFocusLost
+
+    
+    private void recalculaTotais(){
+        vendaDebito = BigDecimal.ZERO;
+        vendaCredito = BigDecimal.ZERO;
+        vendaDinheiro = BigDecimal.ZERO;
+        vendaVale = BigDecimal.ZERO;
+        
+        if(!textFieldDebito.getText().trim().isEmpty()){
+            vendaDebito = new BigDecimal(textFieldDebito.getText().trim());
+        }
+        
+        if(!textFieldCredito.getText().trim().isEmpty()){
+            vendaCredito = new BigDecimal(textFieldCredito.getText().trim());
+        }
+        
+        if(!textFieldDinheiro.getText().trim().isEmpty()){
+            vendaDinheiro = new BigDecimal(textFieldDinheiro.getText().trim());
+        }
+        
+        if(!textFieldVale.getText().trim().isEmpty()){
+            vendaVale = new BigDecimal(textFieldVale.getText().trim());
+        }
+        
+        BigDecimal totalVendido = BigDecimal.ZERO;
+        totalVendido = totalVendido.add(vendaDebito).add(vendaCredito).add(vendaDinheiro).add(vendaVale);
+        
+        labelTotal.setText(totalVendido.toString());
+        labelDiferenca.setText(totalVendido.subtract(total).toString());
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField TextFieldVale;
     private javax.swing.JButton btnCadastrar;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -313,10 +462,13 @@ public class CaixaView extends javax.swing.JDialog {
     private javax.swing.JLabel labelDiferenca;
     private javax.swing.JLabel labelTotal;
     private javax.swing.JLabel labelTotalVendas;
+    private javax.swing.JLabel labelUnidades;
     private javax.swing.JTable tableProdutos;
     private javax.swing.JTextField textFieldCredito;
     private javax.swing.JTextField textFieldDebito;
     private javax.swing.JTextField textFieldDinheiro;
     private javax.swing.JTextField textFieldNome;
+    private javax.swing.JTextField textFieldVale;
     // End of variables declaration//GEN-END:variables
+
 }

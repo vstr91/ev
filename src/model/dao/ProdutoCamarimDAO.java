@@ -11,28 +11,28 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import model.CaixaEvento;
+import model.Evento;
 import model.Produto;
-import model.ProdutoCaixa;
+import model.ProdutoCamarim;
 import model.ProdutoEvento;
 
 /**
  *
  */
-public class ProdutoCaixaDAO {
+public class ProdutoCamarimDAO {
 
-    public ProdutoCaixaDAO() {
+    public ProdutoCamarimDAO() {
 
     }
     
-    public List<ProdutoCaixa> listarTodosPorCaixaEvento(CaixaEvento ev) throws SQLException {
+    public List<ProdutoCamarim> listarTodosPorEvento(Evento ev) throws SQLException {
 
-        String query = "SELECT p.ID, pe.EVENTO, pc.CAIXA, pc.QUANTIDADE " +
+        String query = "SELECT p.ID, pe.EVENTO, pc.AVARIA, pc.PRODUCAO, pc.SOCIOS, pc.CACAU " +
 "FROM produto p LEFT JOIN produto_evento pe ON pe.PRODUTO = p.ID LEFT JOIN " +
-"PRODUTO_CAIXA pc ON (pc.PRODUTO_EVENTO = pe.ID AND (pc.CAIXA = ? OR pc.CAIXA IS NULL)) " +
-"WHERE pe.evento = ? AND (pc.CAIXA = ? OR pc.CAIXA IS NULL) AND p.tipo = 0";
+"PRODUTO_CAMARIM pc ON pc.PRODUTO_EVENTO = pe.ID " +
+"WHERE pe.evento = ?";
         PreparedStatement ps = null;
-        List<ProdutoCaixa> produtos = new ArrayList<>();
+        List<ProdutoCamarim> produtos = new ArrayList<>();
         ProdutoDAO produtoDAO = new ProdutoDAO();
         ProdutoEventoDAO produtoEventoDAO = new ProdutoEventoDAO();
 
@@ -40,29 +40,29 @@ public class ProdutoCaixaDAO {
             
             ps = con.prepareStatement(query);
             ps.setInt(1, ev.getId());
-            ps.setInt(2, ev.getEvento().getId());
-            ps.setInt(3, ev.getId());
             ResultSet rs = ps.executeQuery();
             
             while(rs.next()){
-                ProdutoCaixa produtoCaixa = new ProdutoCaixa();
+                ProdutoCamarim produtoCamarim = new ProdutoCamarim();
                 
                 Produto produto = new Produto();
                 produto.setId(rs.getInt(1));
                 produto = produtoDAO.carregar(produto);
                 
                 ProdutoEvento produtoEvento = new ProdutoEvento();
-                produtoEvento.setEvento(ev.getEvento());
+                produtoEvento.setEvento(ev);
                 produtoEvento.setProduto(produto);
                 
                 produtoEvento = produtoEventoDAO.carregar(produtoEvento);
                 
-                produtoCaixa.setProduto(produtoEvento);
+                produtoCamarim.setProduto(produtoEvento);
                 
-                produtoCaixa.setCaixa(ev);
-                produtoCaixa.setQuantidade(rs.getInt(4));
+                produtoCamarim.setAvaria(rs.getInt(3));
+                produtoCamarim.setProducao(rs.getInt(4));
+                produtoCamarim.setSocios(rs.getInt(5));
+                produtoCamarim.setCacau(rs.getInt(6));
                 
-                produtos.add(produtoCaixa);
+                produtos.add(produtoCamarim);
             }
             
             ps.close();
@@ -80,18 +80,20 @@ public class ProdutoCaixaDAO {
         
     }
 
-    public void salvar(ProdutoCaixa produtoCaixa) throws SQLException {
+    public void salvar(ProdutoCamarim produtoCamarim) throws SQLException {
 
-        String query = "INSERT INTO produto_caixa (produto_evento, caixa, quantidade) "
-                + "VALUES (?, ?, ?)";
+        String query = "INSERT INTO produto_camarim (produto_evento, avaria, producao, socios, cacau) "
+                + "VALUES (?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             ps = con.prepareStatement(query);
-            ps.setInt(1, produtoCaixa.getProduto().getId());
-            ps.setInt(2,produtoCaixa.getCaixa().getId());
-            ps.setInt(3, produtoCaixa.getQuantidade());
+            ps.setInt(1, produtoCamarim.getProduto().getId());
+            ps.setInt(2,produtoCamarim.getAvaria());
+            ps.setInt(3, produtoCamarim.getProducao());
+            ps.setInt(4, produtoCamarim.getSocios());
+            ps.setInt(5, produtoCamarim.getCacau());
             ps.execute();
             ps.close();
             
@@ -106,33 +108,32 @@ public class ProdutoCaixaDAO {
         
     }
     
-    public void editar(ProdutoCaixa produtoCaixa) throws SQLException {
+    public void editar(ProdutoCamarim produtoCamarim) throws SQLException {
 
-        String queryCheca = "SELECT * FROM produto_caixa WHERE produto_evento = ? "
-                + "and caixa = ?";
+        String queryCheca = "SELECT * FROM produto_camarim WHERE produto_evento = ?";
         PreparedStatement psCheca = null;
         
-        String query = "UPDATE produto_caixa SET quantidade = ? WHERE produto_evento = ? "
-                + "and caixa = ?";
+        String query = "UPDATE produto_camarim SET avaria = ?, producao = ?, socios = ?, cacau = ? WHERE produto_evento = ?";
         PreparedStatement ps = null;
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             psCheca = con.prepareStatement(queryCheca);
-            psCheca.setInt(1, produtoCaixa.getProduto().getId());
-            psCheca.setInt(2, produtoCaixa.getCaixa().getId());
+            psCheca.setInt(1, produtoCamarim.getProduto().getId());
             
             ResultSet rs = psCheca.executeQuery();
             
             if(rs.next()){
                 ps = con.prepareStatement(query);
-                ps.setInt(1, produtoCaixa.getQuantidade());
-                ps.setInt(2,produtoCaixa.getProduto().getId());
-                ps.setInt(3, produtoCaixa.getCaixa().getId());
+                ps.setInt(1, produtoCamarim.getAvaria());
+                ps.setInt(2,produtoCamarim.getProducao());
+                ps.setInt(3, produtoCamarim.getSocios());
+                ps.setInt(4, produtoCamarim.getCacau());
+                ps.setInt(5, produtoCamarim.getProduto().getEvento().getId());
                 ps.execute();
                 ps.close();
             } else{
-                salvar(produtoCaixa);
+                salvar(produtoCamarim);
             }
             
             psCheca.close();

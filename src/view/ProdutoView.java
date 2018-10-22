@@ -31,11 +31,15 @@ public class ProdutoView extends javax.swing.JDialog {
     boolean flagEdicao = false;
     Integer idProduto;
 
+    int tipo;
+    
     /**
      * Creates new form ProdutoView
      */
-    public ProdutoView() {
+    public ProdutoView(int tipo) {
         initComponents();
+        
+        this.tipo = tipo;
 
         UnidadeVendaDAO unidadeVendaDAO = new UnidadeVendaDAO();
         try {
@@ -45,7 +49,7 @@ public class ProdutoView extends javax.swing.JDialog {
                 comboTipoUnidade.addItem(un.getNome());
             }
 
-            produtos = produtoDAO.listarTodos();
+            produtos = produtoDAO.listarTodos(tipo);
 
             tableModelProduto = new ProdutoTableModel(produtos);
             tableProdutos.setModel(tableModelProduto);
@@ -280,6 +284,7 @@ public class ProdutoView extends javax.swing.JDialog {
         produto.setTipoUnidade(unidades.get(comboTipoUnidade.getSelectedIndex()));
         produto.setDoses((Integer) spinnerDose.getValue());
         produto.setObservacao(textAreaObservacao.getText().trim());
+        produto.setTipo(tipo);
 
         if (produtoDAO == null) {
             produtoDAO = new ProdutoDAO();
@@ -369,7 +374,7 @@ public class ProdutoView extends javax.swing.JDialog {
 
     private void carregarRegistrosTabela() {
         try {
-            produtos = produtoDAO.listarTodos();
+            produtos = produtoDAO.listarTodos(tipo);
         } catch (SQLException ex) {
             Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
         }

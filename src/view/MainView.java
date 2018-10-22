@@ -55,6 +55,7 @@ public class MainView extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem5 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
         jMenuItem3 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
@@ -129,13 +130,21 @@ public class MainView extends javax.swing.JFrame {
 
         jMenu1.setText("Outras Opções");
 
-        jMenuItem1.setText("Gerenciar Produtos");
+        jMenuItem1.setText("Gerenciar Produtos Bar");
         jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem1ActionPerformed(evt);
             }
         });
         jMenu1.add(jMenuItem1);
+
+        jMenuItem5.setText("Gerenciar Produtos Barracas");
+        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem5ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem5);
 
         jMenuItem2.setText("Relatórios");
         jMenu1.add(jMenuItem2);
@@ -175,7 +184,7 @@ public class MainView extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        ProdutoView produtoView = new ProdutoView();
+        ProdutoView produtoView = new ProdutoView(0);
         produtoView.setLocationRelativeTo(this);
         produtoView.setAlwaysOnTop(true);
         produtoView.setModal(true);
@@ -209,6 +218,14 @@ public class MainView extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_tableEventosMouseClicked
 
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        ProdutoView produtoView = new ProdutoView(1);
+        produtoView.setLocationRelativeTo(this);
+        produtoView.setAlwaysOnTop(true);
+        produtoView.setModal(true);
+        produtoView.setVisible(true);
+    }//GEN-LAST:event_jMenuItem5ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnNovoEvento;
@@ -220,6 +237,7 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tableEventos;
