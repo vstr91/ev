@@ -5,18 +5,20 @@
  */
 package view;
 
-import java.awt.Point;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.scene.input.KeyCode;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import model.BarracaEvento;
 import model.BarracaTableModel;
 import model.CaixaEvento;
@@ -51,12 +53,14 @@ public class FechamentoView extends javax.swing.JDialog {
     DespesaDAO despesaDAO = new DespesaDAO();
     boolean flagEdicao = false;
     Integer idDespesa;
-    
+
     List<ProdutoCamarim> produtosCamarim;
     ProdutoCamarimTableModel tableModelCamarim;
     ProdutoCamarimDAO produtoCamarimDAO = new ProdutoCamarimDAO();
 
     BigDecimal totalVendaCaixas = BigDecimal.ZERO;
+    BigDecimal totalVendaBarracas = BigDecimal.ZERO;
+    BigDecimal totalConsumoCamarim = BigDecimal.ZERO;
 
     public Evento getEvento() {
         return evento;
@@ -77,37 +81,42 @@ public class FechamentoView extends javax.swing.JDialog {
         parent = this;
 
         if (evento != null) {
-            labelEvento.setText(evento.getNome() + " - " + DateTimeFormat.forPattern("dd/MM/YYYY")
+            this.setTitle("Detalhes do Evento " + evento.getNome() + " - " + DateTimeFormat.forPattern("dd/MM/YYYY")
                     .print(evento.getData()));
 
             try {
-                caixas = caixaEventoDAO.listarTodosPorEvento(evento);
-                tableModelCaixa = new CaixaTableModel(caixas);
-                tableVendasBar.setModel(tableModelCaixa);
-                labelVendasBar.setText(String.valueOf(tableModelCaixa.getQtdTotalVendida()));
+//                caixas = caixaEventoDAO.listarTodosPorEvento(evento);
+//                tableModelCaixa = new CaixaTableModel(caixas);
+//                tableVendasBar.setModel(tableModelCaixa);
+//                labelVendasBar.setText(String.valueOf(tableModelCaixa.getQtdTotalVendida()));
 
-                //Barracas
-                barracas = barracaEventoDAO.listarTodosPorEvento(evento);
-                tableModelBarraca = new BarracaTableModel(barracas);
-                tableVendasBarracas.setModel(tableModelBarraca);
-                labelVendasBarracas.setText(String.valueOf(tableModelBarraca.getQtdTotalVendida()));
+                recarregarTabelaCaixa();
+                recarregarTabelaBarraca();
 
                 //Despesas
                 despesas = despesaDAO.listarTodosPorEvento(evento);
                 tableModelDespesa = new DespesaTableModel(despesas);
                 tableDespesas.setModel(tableModelDespesa);
                 tableDespesas.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-                
+
                 //Camarim
                 produtosCamarim = produtoCamarimDAO.listarTodosPorEvento(evento);
                 tableModelCamarim = new ProdutoCamarimTableModel(produtosCamarim);
                 tableConsumoCamarim.setModel(tableModelCamarim);
                 tableConsumoCamarim.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
+                textFieldBarracaChurros.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        calculaTotalBrutoBar();
+                    }
+                });
+
             } catch (SQLException ex) {
                 Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
             }
 
+            // vendas bares
             for (CaixaEvento c : caixas) {
 
                 if (c.getValorTotalVendido() != null) {
@@ -117,6 +126,48 @@ public class FechamentoView extends javax.swing.JDialog {
             }
 
             labelVendasBar.setText(totalVendaCaixas.toString());
+
+            // vendas barracas
+            for (BarracaEvento b : barracas) {
+
+                if (b.getValorTotalVendido() != null) {
+                    totalVendaBarracas = totalVendaBarracas.add(b.getValorTotalVendido());
+                }
+
+            }
+
+            labelVendasBarracas.setText(totalVendaBarracas.toString());
+
+            // consumo camarim
+            for (ProdutoCamarim b : produtosCamarim) {
+
+                if (b.getValorTotalVendido() != null) {
+                    totalConsumoCamarim = totalConsumoCamarim.add(b.getValorTotalVendido());
+                }
+
+            }
+
+            labelConsumoCamarim.setText(totalConsumoCamarim.toString());
+
+            tableConsumoCamarim.getModel().addTableModelListener(new TableModelListener() {
+                @Override
+                public void tableChanged(TableModelEvent e) {
+                    totalConsumoCamarim = BigDecimal.ZERO;
+
+                    for (ProdutoCamarim b : produtosCamarim) {
+
+                        if (b.getValorTotalVendido() != null) {
+                            totalConsumoCamarim = totalConsumoCamarim.add(b.getValorTotalVendido());
+                        }
+
+                    }
+
+                    labelConsumoCamarim.setText(totalConsumoCamarim.toString());
+
+                }
+            });
+
+            calculaTotalBrutoBar();
 
         }
 
@@ -132,7 +183,6 @@ public class FechamentoView extends javax.swing.JDialog {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        labelEvento = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableVendasBar = new javax.swing.JTable();
@@ -142,7 +192,7 @@ public class FechamentoView extends javax.swing.JDialog {
         jScrollPane2 = new javax.swing.JScrollPane();
         tableVendasBarracas = new javax.swing.JTable();
         jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
+        labelTotalBrutoBar = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         labelDespesas = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
@@ -182,13 +232,14 @@ public class FechamentoView extends javax.swing.JDialog {
         btnRelatorio = new javax.swing.JButton();
         btnSalvar = new javax.swing.JButton();
         btnProdutos = new javax.swing.JButton();
+        btnProdutosBarraca = new javax.swing.JButton();
+        btnAdicionarBarraca = new javax.swing.JButton();
+        btnAdicionarCaixa = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Detalhes do Evento");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        labelEvento.setText("Nome do Evento");
 
         jLabel1.setText("Vendas Bar:");
 
@@ -267,8 +318,8 @@ public class FechamentoView extends javax.swing.JDialog {
         jLabel3.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel3.setText("Total Bruto do Bar:");
 
-        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel4.setText("130.000");
+        labelTotalBrutoBar.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        labelTotalBrutoBar.setText("130.000");
 
         jLabel5.setText("Total Despesas (A + B):");
 
@@ -477,6 +528,22 @@ public class FechamentoView extends javax.swing.JDialog {
 
         jLabel14.setText("Barraca Churros + Bala + Batata:");
 
+        textFieldBarracaChurros.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textFieldBarracaChurrosFocusLost(evt);
+            }
+        });
+        textFieldBarracaChurros.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                textFieldBarracaChurrosActionPerformed(evt);
+            }
+        });
+        textFieldBarracaChurros.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textFieldBarracaChurrosKeyTyped(evt);
+            }
+        });
+
         jPanel3.setBackground(new java.awt.Color(204, 0, 0));
 
         jLabel12.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -514,10 +581,31 @@ public class FechamentoView extends javax.swing.JDialog {
 
         btnSalvar.setText("Salvar Informações");
 
-        btnProdutos.setText("Gerenciar Produtos do Evento");
+        btnProdutos.setText("Gerenciar Produtos de Bar do Evento");
         btnProdutos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnProdutosActionPerformed(evt);
+            }
+        });
+
+        btnProdutosBarraca.setText("Gerenciar Produtos de Barraca do Evento");
+        btnProdutosBarraca.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProdutosBarracaActionPerformed(evt);
+            }
+        });
+
+        btnAdicionarBarraca.setText("Adicionar Barraca");
+        btnAdicionarBarraca.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAdicionarBarracaActionPerformed(evt);
+            }
+        });
+
+        btnAdicionarCaixa.setText("Adicionar Caixa");
+        btnAdicionarCaixa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAdicionarCaixaActionPerformed(evt);
             }
         });
 
@@ -530,71 +618,67 @@ public class FechamentoView extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel1)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(labelVendasBar))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel2)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(labelVendasBarracas))
-                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 441, Short.MAX_VALUE)
-                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                                .addGap(0, 11, Short.MAX_VALUE))
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                            .addComponent(jLabel1)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                            .addComponent(labelVendasBar)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(btnAdicionarCaixa))
+                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                            .addComponent(jLabel2)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                            .addComponent(labelVendasBarracas)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(btnAdicionarBarraca))
+                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 441, Short.MAX_VALUE)
+                                        .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                                     .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jLabel8)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jLabel9))
-                                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jLabel5)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(labelDespesas))
-                                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jLabel6)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(jLabel7))
-                                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jLabel10)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(textFieldRepasseProducao))
-                                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jLabel3)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(jLabel4))
-                                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jLabel11)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(labelConsumoCamarim))
-                                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jLabel14)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(textFieldBarracaChurros, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addComponent(btnRelatorio))
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(jLabel13)
-                                        .addComponent(jScrollPane3)
-                                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addComponent(btnSalvar, javax.swing.GroupLayout.Alignment.TRAILING))))
+                                        .addComponent(jLabel8)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel9))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel5)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(labelDespesas))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel6)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jLabel7))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel10)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(textFieldRepasseProducao))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel3)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(labelTotalBrutoBar))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel11)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(labelConsumoCamarim))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel14)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(textFieldBarracaChurros, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(btnRelatorio))
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel13)
+                            .addComponent(jScrollPane3)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnSalvar, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(btnProdutos)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(labelEvento)
-                        .addGap(371, 371, 371))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnProdutosBarraca)
+                        .addGap(371, 462, Short.MAX_VALUE))))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {textFieldBarracaChurros, textFieldRepasseProducao});
@@ -604,13 +688,14 @@ public class FechamentoView extends javax.swing.JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(labelEvento)
-                    .addComponent(btnProdutos))
+                    .addComponent(btnProdutos)
+                    .addComponent(btnProdutosBarraca))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(labelVendasBar)
-                    .addComponent(jLabel13))
+                    .addComponent(jLabel13)
+                    .addComponent(btnAdicionarCaixa))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -618,7 +703,8 @@ public class FechamentoView extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
-                            .addComponent(labelVendasBarracas))
+                            .addComponent(labelVendasBarracas)
+                            .addComponent(btnAdicionarBarraca))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -628,7 +714,7 @@ public class FechamentoView extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel3)
-                            .addComponent(jLabel4))
+                            .addComponent(labelTotalBrutoBar))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel5)
@@ -650,7 +736,7 @@ public class FechamentoView extends javax.swing.JDialog {
                             .addComponent(jLabel11)
                             .addComponent(labelConsumoCamarim))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE))
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -663,6 +749,8 @@ public class FechamentoView extends javax.swing.JDialog {
                     .addComponent(btnSalvar))
                 .addContainerGap())
         );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btnProdutos, btnProdutosBarraca});
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -722,7 +810,7 @@ public class FechamentoView extends javax.swing.JDialog {
     private void btnProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProdutosActionPerformed
         dispose();
 
-        ProdutoEventoView produtoEventoView = new ProdutoEventoView(evento);
+        ProdutoEventoView produtoEventoView = new ProdutoEventoView(evento, 0);
         produtoEventoView.setLocationRelativeTo(this);
         produtoEventoView.setAlwaysOnTop(true);
         produtoEventoView.setModal(true);
@@ -842,6 +930,69 @@ public class FechamentoView extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_tableVendasBarracasMouseClicked
 
+    private void btnProdutosBarracaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProdutosBarracaActionPerformed
+        dispose();
+
+        ProdutoEventoView produtoEventoView = new ProdutoEventoView(evento, 1);
+        produtoEventoView.setLocationRelativeTo(this);
+        produtoEventoView.setAlwaysOnTop(true);
+        produtoEventoView.setModal(true);
+        produtoEventoView.setVisible(true);
+        produtoEventoView.returnToParent(true);
+    }//GEN-LAST:event_btnProdutosBarracaActionPerformed
+
+    private void textFieldBarracaChurrosFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldBarracaChurrosFocusLost
+        calculaTotalBrutoBar();
+    }//GEN-LAST:event_textFieldBarracaChurrosFocusLost
+
+    private void textFieldBarracaChurrosKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldBarracaChurrosKeyTyped
+
+    }//GEN-LAST:event_textFieldBarracaChurrosKeyTyped
+
+    private void textFieldBarracaChurrosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textFieldBarracaChurrosActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textFieldBarracaChurrosActionPerformed
+
+    private void btnAdicionarBarracaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdicionarBarracaActionPerformed
+        BarracaEvento barracaEvento = new BarracaEvento();
+        barracaEvento.setNome("Barraca " + (barracas.size() + 1));
+        barracaEvento.setNumero(barracas.size() + 1);
+
+        Evento umEvento = new Evento();
+        umEvento.setId(evento.getId());
+
+        barracaEvento.setEvento(umEvento);
+
+        try {
+            barracaEventoDAO.salvar(barracaEvento);
+        } catch (SQLException ex) {
+            Logger.getLogger(NovoEventoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        recarregarTabelaBarraca();
+        
+    }//GEN-LAST:event_btnAdicionarBarracaActionPerformed
+
+    private void btnAdicionarCaixaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdicionarCaixaActionPerformed
+        CaixaEvento caixaEvento = new CaixaEvento();
+        caixaEvento.setNome("Caixa " + (caixas.size() + 1));
+        caixaEvento.setNumero(caixas.size() + 1);
+
+        Evento umEvento = new Evento();
+        umEvento.setId(evento.getId());
+
+        caixaEvento.setEvento(umEvento);
+
+        try {
+            caixaEventoDAO.salvar(caixaEvento);
+        } catch (SQLException ex) {
+            Logger.getLogger(NovoEventoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        recarregarTabelaCaixa();
+        
+    }//GEN-LAST:event_btnAdicionarCaixaActionPerformed
+
     private void salvarDespesa() {
         //SALVA PRODUTO
         despesa = new Despesa();
@@ -887,9 +1038,49 @@ public class FechamentoView extends javax.swing.JDialog {
         tableDespesas.setModel(tableModelDespesa);
     }
 
+    private void calculaTotalBrutoBar() {
+
+        BigDecimal totalBruto = totalVendaCaixas.add(totalVendaBarracas);
+
+        if (!textFieldBarracaChurros.getText().trim().isEmpty()) {
+            totalBruto = totalBruto.add(new BigDecimal(textFieldBarracaChurros.getText().trim()));
+        }
+
+        labelTotalBrutoBar.setText(totalBruto.toString());
+
+    }
+    
+    private void recarregarTabelaCaixa(){
+        try {
+            //Barracas
+            caixas = caixaEventoDAO.listarTodosPorEvento(evento);
+        } catch (SQLException ex) {
+            Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+                tableModelCaixa = new CaixaTableModel(caixas);
+                tableVendasBar.setModel(tableModelCaixa);
+                labelVendasBar.setText(String.valueOf(tableModelCaixa.getQtdTotalVendida()));
+    }
+    
+    private void recarregarTabelaBarraca(){
+        try {
+            //Barracas
+            barracas = barracaEventoDAO.listarTodosPorEvento(evento);
+        } catch (SQLException ex) {
+            Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+                tableModelBarraca = new BarracaTableModel(barracas);
+                tableVendasBarracas.setModel(tableModelBarraca);
+                labelVendasBarracas.setText(String.valueOf(tableModelBarraca.getQtdTotalVendida()));
+    }
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAdicionarBarraca;
+    private javax.swing.JButton btnAdicionarCaixa;
     private javax.swing.JButton btnDespesa;
     private javax.swing.JButton btnProdutos;
+    private javax.swing.JButton btnProdutosBarraca;
     private javax.swing.JButton btnRelatorio;
     private javax.swing.JButton btnSalvar;
     private javax.swing.JLabel jLabel1;
@@ -907,7 +1098,6 @@ public class FechamentoView extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -922,9 +1112,9 @@ public class FechamentoView extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JLabel labelConsumoCamarim;
     private javax.swing.JLabel labelDespesas;
-    private javax.swing.JLabel labelEvento;
     private javax.swing.JLabel labelFaltaPagar;
     private javax.swing.JLabel labelRepasseFinal;
+    private javax.swing.JLabel labelTotalBrutoBar;
     private javax.swing.JLabel labelValorTotal;
     private javax.swing.JLabel labelVendasBar;
     private javax.swing.JLabel labelVendasBarracas;

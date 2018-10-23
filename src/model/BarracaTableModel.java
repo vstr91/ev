@@ -100,10 +100,10 @@ public class BarracaTableModel extends AbstractTableModel {
                 valueObject = barracaSelecionada.getNome();
                 break;
             case 1:
-                valueObject = "0";
+                valueObject = String.valueOf(barracaSelecionada.getTotalVendido()) == "null" ? "0" : String.valueOf(barracaSelecionada.getTotalVendido());
                 break;
             case 2:
-                valueObject = "0";                
+                valueObject = String.valueOf(barracaSelecionada.getValorTotalVendido()) == "null" ? "0" : String.valueOf(barracaSelecionada.getValorTotalVendido());               
                 break;
             default:
                 System.err.println("Índice inválido para propriedade do bean BarracaEvento.class");

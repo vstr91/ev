@@ -32,7 +32,7 @@ public class ProdutoDAO {
         try (Connection con = new ConnectionFactory().getConnection()) {
             
             ps = con.prepareStatement(query);
-            ps.setInt(0, tipo);
+            ps.setInt(1, tipo);
             ResultSet rs = ps.executeQuery();
             UnidadeVendaDAO unidadeVendaDAO = new UnidadeVendaDAO();
             

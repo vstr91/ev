@@ -197,8 +197,6 @@ public class NovoEventoView extends javax.swing.JDialog {
                 
                 caixaEvento.setEvento(umEvento);
                 
-                System.out.println("Caixa "+caixaEvento.getNome());
-                
                 try {
                     caixaEventoDAO.salvar(caixaEvento);
                 } catch (SQLException ex) {
@@ -216,8 +214,6 @@ public class NovoEventoView extends javax.swing.JDialog {
                 umEvento.setId(idGerado);
                 
                 barracaEvento.setEvento(umEvento);
-                
-                System.out.println("Barraca "+barracaEvento.getNome());
                 
                 try {
                     barracaEventoDAO.salvar(barracaEvento);

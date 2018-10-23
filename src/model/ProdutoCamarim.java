@@ -6,6 +6,8 @@
 
 package model;
 
+import java.math.BigDecimal;
+
 /**
  *
  */
@@ -55,6 +57,13 @@ public class ProdutoCamarim {
 
     public void setCacau(int cacau) {
         this.cacau = cacau;
+    }
+    
+    public BigDecimal getValorTotalVendido(){
+        
+        int total = getAvaria()+getCacau()+getProducao()+getSocios();
+        
+        return getProduto().getValorVenda().multiply(new BigDecimal(total));
     }
     
 }

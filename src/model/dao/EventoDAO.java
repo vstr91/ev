@@ -44,7 +44,6 @@ public class EventoDAO {
                 Evento evento = new Evento();
                 evento.setId(rs.getInt(1));
                 evento.setNome(rs.getString(2));
-                System.out.println(rs.getString(3));
                 evento.setData(DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.S")
                         .parseDateTime(rs.getString(3)));
                 evento.setObservacao(rs.getString(4));
@@ -143,7 +142,6 @@ public class EventoDAO {
                 evento = new Evento();
                 evento.setId(rs.getInt(1));
                 evento.setNome(rs.getString(2));
-                System.out.println(rs.getString(3));
                 evento.setData(DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.S")
                         .parseDateTime(rs.getString(3)));
                 evento.setObservacao(rs.getString(4));

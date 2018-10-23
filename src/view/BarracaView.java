@@ -5,14 +5,18 @@
  */
 package view;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import model.BarracaEvento;
-import model.ProdutoCaixaTableModel;
-import model.dao.BarracaEventoDAO;
-import model.dao.ProdutoCaixaDAO;
+import model.ProdutoBarraca;
+import model.ProdutoBarracaTableModel;
+import model.ProdutoCaixa;
+import model.dao.ProdutoBarracaDAO;
 
 /**
  *
@@ -24,8 +28,17 @@ public class BarracaView extends javax.swing.JDialog {
      */
     
     BarracaEvento barraca;
-    List<BarracaEvento> produtos;
-    BarracaEventoDAO barracaEventoDAO = new BarracaEventoDAO();
+    List<ProdutoBarraca> produtos;
+    ProdutoBarracaDAO produtoBarracaDAO = new ProdutoBarracaDAO();
+    ProdutoBarracaTableModel tableModelProdutoBarraca;
+    
+    BigDecimal total;
+    Integer totalUnidades;
+    
+    BigDecimal vendaDebito = BigDecimal.ZERO;
+    BigDecimal vendaCredito = BigDecimal.ZERO;
+    BigDecimal vendaDinheiro = BigDecimal.ZERO;
+    BigDecimal vendaVale = BigDecimal.ZERO;
     
     public BarracaView(BarracaEvento barraca) {
         initComponents();
@@ -35,12 +48,39 @@ public class BarracaView extends javax.swing.JDialog {
         labelNome.setText(barraca.getNome());
         
         try {
-            produtos = barracaEventoDAO.listarTodosPorEvento(barraca.getEvento());
-//            tableModelProdutoBarraca = new ProdutoBarracaTableModel(produtos);
-//            tableProdutos.setModel(tableModelProdutoBarraca);
+            produtos = produtoBarracaDAO.listarTodosPorBarracaEvento(barraca);
+            tableModelProdutoBarraca = new ProdutoBarracaTableModel(produtos);
+            tableProdutos.setModel(tableModelProdutoBarraca);
         } catch (SQLException ex) {
             Logger.getLogger(ProdutoEventoView.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        total = BigDecimal.ZERO;
+        totalUnidades = 0;
+
+        for (ProdutoBarraca p : produtos) {
+            total = total.add(p.getProduto().getValorVenda().multiply(new BigDecimal(p.getQuantidade())));
+            totalUnidades = totalUnidades + p.getQuantidade();
+        }
+
+        labelVendas.setText(total.toString());
+        labelUnidades.setText(String.valueOf(totalUnidades));
+
+        tableProdutos.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                total = BigDecimal.ZERO;
+                totalUnidades = 0;
+
+                for (ProdutoBarraca p : produtos) {
+                    total = total.add(p.getProduto().getValorVenda().multiply(new BigDecimal(p.getQuantidade())));
+                    totalUnidades = totalUnidades + p.getQuantidade();
+                }
+
+                labelVendas.setText(total.toString());
+                labelUnidades.setText(String.valueOf(totalUnidades));
+            }
+        });
         
     }
 
@@ -62,9 +102,16 @@ public class BarracaView extends javax.swing.JDialog {
         tableProdutos = new javax.swing.JTable();
         jLabel4 = new javax.swing.JLabel();
         labelVendas = new javax.swing.JLabel();
-        btnCadastrar = new javax.swing.JButton();
+        btnFechar = new javax.swing.JButton();
+        labelUnidades = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -106,7 +153,16 @@ public class BarracaView extends javax.swing.JDialog {
 
         labelVendas.setText("1000");
 
-        btnCadastrar.setText("Cadastrar");
+        btnFechar.setText("Fechar");
+        btnFechar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFecharActionPerformed(evt);
+            }
+        });
+
+        labelUnidades.setText("10");
+
+        jLabel1.setText("unidades");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -130,14 +186,18 @@ public class BarracaView extends javax.swing.JDialog {
                             .addComponent(textFieldNome)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(btnCadastrar))
+                                .addComponent(btnFechar))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel3)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addComponent(jLabel4)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(labelVendas)))
+                                        .addComponent(labelVendas)
+                                        .addGap(58, 58, 58)
+                                        .addComponent(labelUnidades)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel1)))
                                 .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
@@ -157,9 +217,11 @@ public class BarracaView extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(labelVendas))
+                    .addComponent(labelVendas)
+                    .addComponent(labelUnidades)
+                    .addComponent(jLabel1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 25, Short.MAX_VALUE)
-                .addComponent(btnCadastrar)
+                .addComponent(btnFechar)
                 .addContainerGap())
         );
 
@@ -183,15 +245,28 @@ public class BarracaView extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        FechamentoView fechamentoView = new FechamentoView(barraca.getEvento());
+        fechamentoView.setLocationRelativeTo(this);
+        fechamentoView.setAlwaysOnTop(true);
+        fechamentoView.setModal(true);
+        fechamentoView.setVisible(true);
+    }//GEN-LAST:event_formWindowClosed
+
+    private void btnFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFecharActionPerformed
+        dispose();
+    }//GEN-LAST:event_btnFecharActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnCadastrar;
+    private javax.swing.JButton btnFechar;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel labelNome;
+    private javax.swing.JLabel labelUnidades;
     private javax.swing.JLabel labelVendas;
     private javax.swing.JTable tableProdutos;
     private javax.swing.JTextField textFieldNome;

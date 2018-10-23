@@ -5,6 +5,7 @@
  */
 package model.dao;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -76,11 +77,11 @@ public class ProdutoEventoDAO {
         
     }
     
-    public List<ProdutoEvento> listarTodosPorEvento(Evento ev) throws SQLException {
+    public List<ProdutoEvento> listarTodosPorEvento(Evento ev, int tipo) throws SQLException {
 
         String query = "SELECT p.id, -1 AS evento, valor_custo, valor_venda, pe.id, pe.estoque " +
 "FROM produto p LEFT JOIN produto_evento pe ON (p.id = pe.PRODUTO OR pe.PRODUTO IS NULL) " +
-"AND evento = ?";
+"AND evento = ? WHERE p.tipo = ?";
         PreparedStatement ps = null;
         List<ProdutoEvento> produtos = new ArrayList<>();
         ProdutoDAO produtoDAO = new ProdutoDAO();
@@ -90,6 +91,7 @@ public class ProdutoEventoDAO {
             
             ps = con.prepareStatement(query);
             ps.setInt(1, ev.getId());
+            ps.setInt(2, tipo);
             ResultSet rs = ps.executeQuery();
             
             while(rs.next()){
@@ -130,6 +132,10 @@ public class ProdutoEventoDAO {
         String query = "INSERT INTO produto_evento (valor_custo, valor_venda, evento, produto, estoque) "
                 + "VALUES (?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
+        
+        if(produtoEvento.getEstoque() == null){
+            produtoEvento.setEstoque(BigDecimal.ZERO);
+        }
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
@@ -138,12 +144,12 @@ public class ProdutoEventoDAO {
             ps.setBigDecimal(2,produtoEvento.getValorVenda());
             ps.setInt(3, produtoEvento.getEvento().getId());
             ps.setInt(4, produtoEvento.getProduto().getId());
-            ps.setBigDecimal(4, produtoEvento.getEstoque());
+            ps.setBigDecimal(5, produtoEvento.getEstoque());
             ps.execute();
             ps.close();
             
         } catch (SQLException e) {
-            System.out.println(e);
+            System.out.println("ADICAO: "+e);
             
             if(ps != null){
                 ps.close();
@@ -162,6 +168,10 @@ public class ProdutoEventoDAO {
         String query = "UPDATE produto_evento SET valor_custo = ?, valor_venda = ?, estoque = ? WHERE evento = ? "
                 + "and produto = ?";
         PreparedStatement ps = null;
+        
+        if(produtoEvento.getEstoque() == null){
+            produtoEvento.setEstoque(BigDecimal.ZERO);
+        }
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
@@ -189,7 +199,7 @@ public class ProdutoEventoDAO {
             
             
         } catch (SQLException e) {
-            System.out.println(e);
+            System.out.println("EDICAO: "+e);
             
             if(ps != null){
                 ps.close();

@@ -6,6 +6,8 @@
 
 package model;
 
+import java.math.BigDecimal;
+
 /**
  *
  */
@@ -16,6 +18,9 @@ public class BarracaEvento {
     private Integer numero;
     private Evento evento;
 
+    private Integer totalVendido;
+    private BigDecimal valorTotalVendido;
+    
     public Integer getId() {
         return id;
     }
@@ -46,6 +51,22 @@ public class BarracaEvento {
 
     public void setEvento(Evento evento) {
         this.evento = evento;
+    }
+
+    public Integer getTotalVendido() {
+        return totalVendido;
+    }
+
+    public void setTotalVendido(Integer totalVendido) {
+        this.totalVendido = totalVendido;
+    }
+
+    public BigDecimal getValorTotalVendido() {
+        return valorTotalVendido;
+    }
+
+    public void setValorTotalVendido(BigDecimal valorTotalVendido) {
+        this.valorTotalVendido = valorTotalVendido;
     }
     
 }

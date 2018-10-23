@@ -24,18 +24,20 @@ public class ProdutoEventoView extends javax.swing.JDialog {
     List<ProdutoEvento> produtos;
     ProdutoEventoDAO produtoEventoDAO = new ProdutoEventoDAO();
     ProdutoEventoTableModel tableModelProdutoEvento;
+    Integer tipo;
 
     /**
      * Creates new form ProdutoEventoView
      */
-    public ProdutoEventoView(Evento e) {
+    public ProdutoEventoView(Evento e, int tipo) {
         initComponents();
         this.evento = e;
+        this.tipo = tipo;
         
         this.setTitle("Produtos à Venda no Evento "+e.getNome());
 
         try {
-            produtos = produtoEventoDAO.listarTodosPorEvento(evento);
+            produtos = produtoEventoDAO.listarTodosPorEvento(evento, tipo);
             tableModelProdutoEvento = new ProdutoEventoTableModel(produtos);
             tableProdutos.setModel(tableModelProdutoEvento);
         } catch (SQLException ex) {
@@ -133,7 +135,7 @@ public class ProdutoEventoView extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNovoProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoProdutoActionPerformed
-        ProdutoView produtoView = new ProdutoView();
+        ProdutoView produtoView = new ProdutoView(tipo);
         produtoView.setLocationRelativeTo(this);
         produtoView.setAlwaysOnTop(true);
         produtoView.setModal(true);
