@@ -5,6 +5,7 @@
  */
 package model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -17,6 +18,7 @@ public class BarracaTableModel extends AbstractTableModel {
     private List<BarracaEvento> barracas;
     private String[] colunas = new String[]{"Barraca", "Quantidade", "Valor"};
     private int qtdTotalVendida = 0;
+    private BigDecimal valorTotalVendido = BigDecimal.ZERO;
 
     public int getQtdTotalVendida() {
         return qtdTotalVendida;
@@ -26,12 +28,22 @@ public class BarracaTableModel extends AbstractTableModel {
         this.qtdTotalVendida = qtdTotalVendida;
     }
 
+    public BigDecimal getValorTotalVendido() {
+        return valorTotalVendido;
+    }
+
+    public void setValorTotalVendido(BigDecimal valorTotalVendido) {
+        this.valorTotalVendido = valorTotalVendido;
+    }    
+    
+
     /**
      * Creates a new instance of DevmediaTableModel
      */
     public BarracaTableModel(List<BarracaEvento> barracas) {
         this.barracas = barracas;
         somarQuantidadeVendida();
+        somarValorVendido();
     }
 
     public BarracaTableModel() {
@@ -154,7 +166,19 @@ public class BarracaTableModel extends AbstractTableModel {
     public void somarQuantidadeVendida(){
         
         for(BarracaEvento barraca : barracas){
-            qtdTotalVendida = qtdTotalVendida + barraca.getNumero();
+            qtdTotalVendida = qtdTotalVendida + barraca.getTotalVendido();
+        }
+        
+    }
+    
+    public void somarValorVendido(){
+
+        for(BarracaEvento barraca : barracas){
+            
+            if(barraca.getValorTotalVendido() != null){
+                valorTotalVendido.add(barraca.getValorTotalVendido());
+            }
+            
         }
         
     }

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import model.Evento;
 import model.Produto;
 import model.ProdutoTableModel;
 import model.UnidadeVenda;
@@ -30,8 +31,18 @@ public class ProdutoView extends javax.swing.JDialog {
     Produto produto;
     boolean flagEdicao = false;
     Integer idProduto;
+    
+    Evento evento;
 
     int tipo;
+
+    public Evento getEvento() {
+        return evento;
+    }
+
+    public void setEvento(Evento evento) {
+        this.evento = evento;
+    }
     
     /**
      * Creates new form ProdutoView
@@ -87,6 +98,11 @@ public class ProdutoView extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Cadastro de Produto");
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Novo Produto"));
 
@@ -360,6 +376,20 @@ public class ProdutoView extends javax.swing.JDialog {
 
         }
     }//GEN-LAST:event_tableProdutosMouseClicked
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        
+        if(evento != null){
+            ProdutoEventoView produtoEventoView = new ProdutoEventoView(evento, 0);
+            produtoEventoView.setLocationRelativeTo(this);
+            produtoEventoView.setAlwaysOnTop(true);
+            produtoEventoView.setModal(true);
+            produtoEventoView.setVisible(true);
+            produtoEventoView.returnToParent(true);
+        }
+        
+        
+    }//GEN-LAST:event_formWindowClosed
 
     private boolean testaRegistro() {
         boolean retorno = false;

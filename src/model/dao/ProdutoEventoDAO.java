@@ -58,6 +58,7 @@ public class ProdutoEventoDAO {
                 produtoEvento.setValorCusto(rs.getBigDecimal(4));
                 produtoEvento.setValorVenda(rs.getBigDecimal(5));
                 produtoEvento.setEstoque(rs.getBigDecimal(6));
+                produtoEvento.setSobra(rs.getBigDecimal(7));
                 
                 produtos.add(produtoEvento);
             }
@@ -79,7 +80,7 @@ public class ProdutoEventoDAO {
     
     public List<ProdutoEvento> listarTodosPorEvento(Evento ev, int tipo) throws SQLException {
 
-        String query = "SELECT p.id, -1 AS evento, valor_custo, valor_venda, pe.id, pe.estoque " +
+        String query = "SELECT p.id, -1 AS evento, valor_custo, valor_venda, pe.id, pe.estoque, pe.sobra " +
 "FROM produto p LEFT JOIN produto_evento pe ON (p.id = pe.PRODUTO OR pe.PRODUTO IS NULL) " +
 "AND evento = ? WHERE p.tipo = ?";
         PreparedStatement ps = null;
@@ -108,6 +109,7 @@ public class ProdutoEventoDAO {
                 produtoEvento.setValorVenda(rs.getBigDecimal(4));
                 produtoEvento.setId(rs.getInt(5));
                 produtoEvento.setEstoque(rs.getBigDecimal(6));
+                produtoEvento.setSobra(rs.getBigDecimal(7));
                 
                 produtos.add(produtoEvento);
             }
@@ -129,8 +131,8 @@ public class ProdutoEventoDAO {
 
     public void salvar(ProdutoEvento produtoEvento) throws SQLException {
 
-        String query = "INSERT INTO produto_evento (valor_custo, valor_venda, evento, produto, estoque) "
-                + "VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO produto_evento (valor_custo, valor_venda, evento, produto, estoque, sobra) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = null;
         
         if(produtoEvento.getEstoque() == null){
@@ -145,6 +147,7 @@ public class ProdutoEventoDAO {
             ps.setInt(3, produtoEvento.getEvento().getId());
             ps.setInt(4, produtoEvento.getProduto().getId());
             ps.setBigDecimal(5, produtoEvento.getEstoque());
+            ps.setBigDecimal(5, produtoEvento.getSobra());
             ps.execute();
             ps.close();
             
@@ -165,7 +168,7 @@ public class ProdutoEventoDAO {
                 + "and produto = ?";
         PreparedStatement psCheca = null;
         
-        String query = "UPDATE produto_evento SET valor_custo = ?, valor_venda = ?, estoque = ? WHERE evento = ? "
+        String query = "UPDATE produto_evento SET valor_custo = ?, valor_venda = ?, estoque = ?, sobra = ? WHERE evento = ? "
                 + "and produto = ?";
         PreparedStatement ps = null;
         
@@ -186,8 +189,9 @@ public class ProdutoEventoDAO {
                 ps.setBigDecimal(1, produtoEvento.getValorCusto());
                 ps.setBigDecimal(2,produtoEvento.getValorVenda());
                 ps.setBigDecimal(3,produtoEvento.getEstoque());
-                ps.setInt(4, produtoEvento.getEvento().getId());
-                ps.setInt(5, produtoEvento.getProduto().getId());
+                ps.setBigDecimal(4,produtoEvento.getSobra());
+                ps.setInt(5, produtoEvento.getEvento().getId());
+                ps.setInt(6, produtoEvento.getProduto().getId());
                 ps.execute();
                 ps.close();
             } else{
@@ -215,7 +219,7 @@ public class ProdutoEventoDAO {
     
     public ProdutoEvento carregar(ProdutoEvento umProduto) throws SQLException {
 
-        String query = "SELECT produto, evento, valor_custo, valor_venda, id, estoque FROM produto_evento WHERE produto = ? AND evento = ?";
+        String query = "SELECT produto, evento, valor_custo, valor_venda, id, estoque, sobra FROM produto_evento WHERE produto = ? AND evento = ?";
         PreparedStatement ps = null;
         ProdutoEvento produto = null;
         ProdutoDAO produtoDAO = new ProdutoDAO();
@@ -246,6 +250,7 @@ public class ProdutoEventoDAO {
                 produto.setValorVenda(rs.getBigDecimal(4));
                 produto.setId(rs.getInt(5));
                 produto.setEstoque(rs.getBigDecimal(6));
+                produto.setSobra(rs.getBigDecimal(7));
             }
             
             ps.close();

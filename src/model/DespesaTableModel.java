@@ -17,16 +17,27 @@ public class DespesaTableModel extends AbstractTableModel {
 
     private List<Despesa> despesas;
     private String[] colunas = new String[]{"Nome", "Valor Unitário", "Quantidade", "Valor Total", "Valor Pago", "Falta Pagar", "Observação"};
+    private BigDecimal valorTotalDespesas = BigDecimal.ZERO;
+
+    public BigDecimal getValorTotalDespesas() {
+        return valorTotalDespesas;
+    }
+
+    public void setValorTotalDespesas(BigDecimal valorTotalDespesas) {
+        this.valorTotalDespesas = valorTotalDespesas;
+    }
 
     /**
      * Creates a new instance of DevmediaTableModel
      */
     public DespesaTableModel(List<Despesa> despesas) {
         this.despesas = despesas;
+        somarValorDespesas();
     }
 
     public DespesaTableModel() {
         this.despesas = new ArrayList<Despesa>();
+        somarValorDespesas();
     }
 
     public int getRowCount() {
@@ -164,6 +175,19 @@ public class DespesaTableModel extends AbstractTableModel {
 
     public boolean isEmpty() {
         return despesas.isEmpty();
+    }
+    
+    public void somarValorDespesas(){
+        
+        for(Despesa despesa : despesas){
+            
+            if(despesa.getValorUnitario() != null){
+                BigDecimal val = despesa.getValorUnitario().multiply(new BigDecimal(despesa.getQuantidade())).subtract(despesa.getValorPago());
+                valorTotalDespesas = valorTotalDespesas.add(val);
+            }
+            
+        }
+        
     }
 
 }

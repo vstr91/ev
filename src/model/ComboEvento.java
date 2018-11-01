@@ -11,15 +11,13 @@ import java.math.BigDecimal;
 /**
  *
  */
-public class ProdutoEvento {
+public class ComboEvento {
 
     private Integer id;
-    private Produto produto;
+    private Combo combo;
     private Evento evento;
     private BigDecimal valorCusto;
     private BigDecimal valorVenda;
-    private BigDecimal estoque;
-    private BigDecimal sobra;
 
     public Integer getId() {
         return id;
@@ -28,13 +26,13 @@ public class ProdutoEvento {
     public void setId(Integer id) {
         this.id = id;
     }
-    
-    public Produto getProduto() {
-        return produto;
+
+    public Combo getCombo() {
+        return combo;
     }
 
-    public void setProduto(Produto produto) {
-        this.produto = produto;
+    public void setCombo(Combo combo) {
+        this.combo = combo;
     }
 
     public Evento getEvento() {
@@ -59,22 +57,6 @@ public class ProdutoEvento {
 
     public void setValorVenda(BigDecimal valorVenda) {
         this.valorVenda = valorVenda;
-    }
-
-    public BigDecimal getEstoque() {
-        return estoque;
-    }
-
-    public void setEstoque(BigDecimal estoque) {
-        this.estoque = estoque;
-    }
-
-    public BigDecimal getSobra() {
-        return sobra;
-    }
-
-    public void setSobra(BigDecimal sobra) {
-        this.sobra = sobra;
     }
     
 }

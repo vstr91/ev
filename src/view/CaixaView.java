@@ -14,9 +14,12 @@ import javax.swing.JOptionPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import model.CaixaEvento;
+import model.ComboCaixa;
+import model.ComboCaixaTableModel;
 import model.ProdutoCaixa;
 import model.ProdutoCaixaTableModel;
 import model.dao.CaixaEventoDAO;
+import model.dao.ComboCaixaDAO;
 import model.dao.ProdutoCaixaDAO;
 
 /**
@@ -26,12 +29,15 @@ public class CaixaView extends javax.swing.JDialog {
 
     CaixaEvento caixa;
     List<ProdutoCaixa> produtos;
+    List<ComboCaixa> combos;
     ProdutoCaixaDAO produtoCaixaDAO = new ProdutoCaixaDAO();
+    ComboCaixaDAO comboCaixaDAO = new ComboCaixaDAO();
     CaixaEventoDAO caixaEventoDAO = new CaixaEventoDAO();
     ProdutoCaixaTableModel tableModelProdutoCaixa;
+    ComboCaixaTableModel tableModelComboCaixa;
     BigDecimal total;
     Integer totalUnidades;
-    
+
     BigDecimal vendaDebito = BigDecimal.ZERO;
     BigDecimal vendaCredito = BigDecimal.ZERO;
     BigDecimal vendaDinheiro = BigDecimal.ZERO;
@@ -52,7 +58,7 @@ public class CaixaView extends javax.swing.JDialog {
         initComponents();
         this.caixa = caixa;
         labelCaixa.setText(caixa.getNome());
-        
+
         textFieldCredito.setText(caixa.getVendaCredito().toString());
         textFieldDebito.setText(caixa.getVendaDebito().toString());
         textFieldDinheiro.setText(caixa.getVendaDinheiro().toString());
@@ -62,6 +68,11 @@ public class CaixaView extends javax.swing.JDialog {
             produtos = produtoCaixaDAO.listarTodosPorCaixaEvento(caixa);
             tableModelProdutoCaixa = new ProdutoCaixaTableModel(produtos);
             tableProdutos.setModel(tableModelProdutoCaixa);
+
+            combos = comboCaixaDAO.listarTodosPorCaixaEvento(caixa);
+            tableModelComboCaixa = new ComboCaixaTableModel(combos);
+            tableCombos.setModel(tableModelComboCaixa);
+
             textFieldNome.setVisible(false);
             jLabel1.setVisible(false);
         } catch (SQLException ex) {
@@ -76,27 +87,28 @@ public class CaixaView extends javax.swing.JDialog {
             totalUnidades = totalUnidades + p.getQuantidade();
         }
 
+        for (ComboCaixa c : combos) {
+            total = total.add(c.getProduto().getValorVenda().multiply(new BigDecimal(c.getQuantidade())));
+            totalUnidades = totalUnidades + c.getQuantidade();
+        }
+
         labelTotalVendas.setText(total.toString());
         labelUnidades.setText(String.valueOf(totalUnidades));
 
         tableProdutos.getModel().addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
-                total = BigDecimal.ZERO;
-                totalUnidades = 0;
-
-                for (ProdutoCaixa p : produtos) {
-                    total = total.add(p.getProduto().getValorVenda().multiply(new BigDecimal(p.getQuantidade())));
-                    totalUnidades = totalUnidades + p.getQuantidade();
-                }
-
-                labelTotalVendas.setText(total.toString());
-                labelUnidades.setText(String.valueOf(totalUnidades));
-                
-                recalculaTotais();
+                recalcularValores();
             }
         });
         
+        tableCombos.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                recalcularValores();
+            }
+        });
+
         recalculaTotais();
 
     }
@@ -134,6 +146,9 @@ public class CaixaView extends javax.swing.JDialog {
         btnCadastrar = new javax.swing.JButton();
         labelUnidades = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tableCombos = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Vendas por Caixa");
@@ -174,7 +189,7 @@ public class CaixaView extends javax.swing.JDialog {
         });
         jScrollPane1.setViewportView(tableProdutos);
 
-        jLabel2.setText("Vendas");
+        jLabel2.setText("Vendas Produtos");
 
         jLabel3.setText("Débito");
 
@@ -231,20 +246,27 @@ public class CaixaView extends javax.swing.JDialog {
 
         jLabel10.setText("unidades");
 
+        jLabel11.setText("Vendas Combos");
+
+        tableCombos.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane2.setViewportView(tableCombos);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(textFieldNome)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -257,47 +279,51 @@ public class CaixaView extends javax.swing.JDialog {
                                 .addContainerGap()
                                 .addComponent(jLabel9)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(labelTotalVendas)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGap(0, 28, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel7)
-                                    .addComponent(labelTotal))
-                                .addGap(77, 77, 77)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel8)
-                                    .addComponent(labelDiferenca)))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel3)
-                                    .addComponent(textFieldDebito, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(labelTotalVendas)
                                 .addGap(18, 18, 18)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel4)
-                                    .addComponent(textFieldCredito, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(textFieldDinheiro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel5))
-                                .addGap(18, 18, 18)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel6)
-                                    .addComponent(textFieldVale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                                 .addComponent(labelUnidades)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel10)
-                                .addGap(167, 167, 167)))
-                        .addGap(25, 25, 25))
+                                .addComponent(jLabel10)))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(btnCadastrar)
-                        .addContainerGap())))
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnCadastrar))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(textFieldNome)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel7)
+                                            .addComponent(labelTotal))
+                                        .addGap(77, 77, 77)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel8)
+                                            .addComponent(labelDiferenca)))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel3)
+                                            .addComponent(textFieldDebito, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(18, 18, 18)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel4)
+                                            .addComponent(textFieldCredito, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(18, 18, 18)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(textFieldDinheiro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jLabel5))
+                                        .addGap(18, 18, 18)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel6)
+                                            .addComponent(textFieldVale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addComponent(jLabel11))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))))
+                .addContainerGap())
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {textFieldCredito, textFieldDebito, textFieldDinheiro, textFieldVale});
@@ -315,13 +341,17 @@ public class CaixaView extends javax.swing.JDialog {
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel11)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(labelTotalVendas)
                     .addComponent(labelUnidades)
                     .addComponent(jLabel10))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel3)
@@ -347,7 +377,7 @@ public class CaixaView extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(labelTotal)
                     .addComponent(labelDiferenca))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(23, 23, 23)
                 .addComponent(btnCadastrar)
                 .addContainerGap())
         );
@@ -375,12 +405,12 @@ public class CaixaView extends javax.swing.JDialog {
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
         caixa.setTotalVendido(totalUnidades);
         caixa.setValorTotalVendido(total);
-        
+
         caixa.setVendaDebito(vendaDebito);
         caixa.setVendaCredito(vendaCredito);
         caixa.setVendaDinheiro(vendaDinheiro);
         caixa.setVendaVale(vendaVale);
-        
+
         try {
             caixaEventoDAO.editar(caixa);
             JOptionPane.showMessageDialog(this, "Dados cadastrados com sucesso!", "Caixa Cadastrado", JOptionPane.INFORMATION_MESSAGE);
@@ -414,40 +444,60 @@ public class CaixaView extends javax.swing.JDialog {
         recalculaTotais();
     }//GEN-LAST:event_textFieldValeFocusLost
 
-    
-    private void recalculaTotais(){
+    private void recalculaTotais() {
         vendaDebito = BigDecimal.ZERO;
         vendaCredito = BigDecimal.ZERO;
         vendaDinheiro = BigDecimal.ZERO;
         vendaVale = BigDecimal.ZERO;
-        
-        if(!textFieldDebito.getText().trim().isEmpty()){
+
+        if (!textFieldDebito.getText().trim().isEmpty()) {
             vendaDebito = new BigDecimal(textFieldDebito.getText().trim());
         }
-        
-        if(!textFieldCredito.getText().trim().isEmpty()){
+
+        if (!textFieldCredito.getText().trim().isEmpty()) {
             vendaCredito = new BigDecimal(textFieldCredito.getText().trim());
         }
-        
-        if(!textFieldDinheiro.getText().trim().isEmpty()){
+
+        if (!textFieldDinheiro.getText().trim().isEmpty()) {
             vendaDinheiro = new BigDecimal(textFieldDinheiro.getText().trim());
         }
-        
-        if(!textFieldVale.getText().trim().isEmpty()){
+
+        if (!textFieldVale.getText().trim().isEmpty()) {
             vendaVale = new BigDecimal(textFieldVale.getText().trim());
         }
-        
+
         BigDecimal totalVendido = BigDecimal.ZERO;
         totalVendido = totalVendido.add(vendaDebito).add(vendaCredito).add(vendaDinheiro).add(vendaVale);
-        
+
         labelTotal.setText(totalVendido.toString());
         labelDiferenca.setText(totalVendido.subtract(total).toString());
     }
-    
+
+    private void recalcularValores() {
+        total = BigDecimal.ZERO;
+        totalUnidades = 0;
+
+        for (ProdutoCaixa p : produtos) {
+            total = total.add(p.getProduto().getValorVenda().multiply(new BigDecimal(p.getQuantidade())));
+            totalUnidades = totalUnidades + p.getQuantidade();
+        }
+
+        for (ComboCaixa c : combos) {
+            total = total.add(c.getProduto().getValorVenda().multiply(new BigDecimal(c.getQuantidade())));
+            totalUnidades = totalUnidades + c.getQuantidade();
+        }
+
+        labelTotalVendas.setText(total.toString());
+        labelUnidades.setText(String.valueOf(totalUnidades));
+
+        recalculaTotais();
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCadastrar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -458,11 +508,13 @@ public class CaixaView extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel labelCaixa;
     private javax.swing.JLabel labelDiferenca;
     private javax.swing.JLabel labelTotal;
     private javax.swing.JLabel labelTotalVendas;
     private javax.swing.JLabel labelUnidades;
+    private javax.swing.JTable tableCombos;
     private javax.swing.JTable tableProdutos;
     private javax.swing.JTextField textFieldCredito;
     private javax.swing.JTextField textFieldDebito;

@@ -12,27 +12,25 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.AbstractTableModel;
-import model.dao.ProdutoDAO;
-import model.dao.ProdutoEventoDAO;
+import model.dao.ComboCaixaDAO;
+import model.dao.ProdutoCaixaDAO;
 
 /**
  *
  */
-public class ProdutoEventoTableModel extends AbstractTableModel {
+public class ComboCaixaTableModel extends AbstractTableModel {
 
-    private List<ProdutoEvento> produtos;
-    private String[] colunas = new String[]{"Nome", "Valor Custo", "Valor Venda", "Estoque", "Sobra", "A Pagar"};
-    ProdutoEventoDAO produtoEventoDAO = new ProdutoEventoDAO();
+    private List<ComboCaixa> produtos;
+    private String[] colunas = new String[]{"Combo", "Valor Venda", "Quantidade", "Total"};
+    ProdutoCaixaDAO produtoCaixaDAO = new ProdutoCaixaDAO();
+    ComboCaixaDAO comboCaixaDAO = new ComboCaixaDAO();
 
-    /**
-     * Creates a new instance of DevmediaTableModel
-     */
-    public ProdutoEventoTableModel(List<ProdutoEvento> produtos) {
+    public ComboCaixaTableModel(List<ComboCaixa> produtos) {
         this.produtos = produtos;
     }
 
-    public ProdutoEventoTableModel() {
-        this.produtos = new ArrayList<ProdutoEvento>();
+    public ComboCaixaTableModel() {
+        this.produtos = new ArrayList<ComboCaixa>();
     }
 
     public int getRowCount() {
@@ -53,28 +51,24 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
         return String.class;
     }
 
-    public void setValueAt(ProdutoEvento aValue, int rowIndex) {
-        ProdutoEvento produto = produtos.get(rowIndex);
+    public void setValueAt(ComboCaixa aValue, int rowIndex) {
+        ComboCaixa produto = produtos.get(rowIndex);
 
-        produto.setEvento(aValue.getEvento());
+        produto.setCaixa(aValue.getCaixa());
         produto.setProduto(aValue.getProduto());
-        produto.setValorCusto(aValue.getValorCusto());
-        produto.setValorVenda(aValue.getValorVenda());
-        produto.setEstoque(aValue.getEstoque());
-        produto.setSobra(aValue.getSobra());
+        produto.setQuantidade(aValue.getQuantidade());
 
 //        fireTableCellUpdated(rowIndex, 0);
         fireTableCellUpdated(rowIndex, 0);
         fireTableCellUpdated(rowIndex, 1);
         fireTableCellUpdated(rowIndex, 2);
         fireTableCellUpdated(rowIndex, 3);
-        fireTableCellUpdated(rowIndex, 4);
 
     }
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        ProdutoEvento produto = produtos.get(rowIndex);
+        ComboCaixa produto = produtos.get(rowIndex);
 
         switch (columnIndex) {
 //            case 0:
@@ -83,17 +77,8 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
 //                produto.setEvento((Evento) aValue);
 //            case 1:
 //                produto.setProduto((Produto) aValue);
-            case 1:
-                produto.setValorCusto(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
-                break;
             case 2:
-                produto.setValorVenda(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
-                break;
-            case 3:
-                produto.setEstoque(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
-                break;
-            case 4:
-                produto.setSobra(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
+                produto.setQuantidade(Integer.valueOf((String) aValue));
                 break;
             default:
                 System.err.println("Índice da coluna inválido");
@@ -101,54 +86,38 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
         }
         
         try {
-            produtoEventoDAO.editar(produto);
+            comboCaixaDAO.editar(produto);
         } catch (SQLException ex) {
-            Logger.getLogger(ProdutoEventoTableModel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ProdutoCaixaTableModel.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         fireTableCellUpdated(rowIndex, columnIndex);
-        fireTableCellUpdated(rowIndex, 5);
+        fireTableCellUpdated(rowIndex, 3);
     }
 
     public Object getValueAt(int rowIndex, int columnIndex) {
-        ProdutoEvento produtoSelecionado = produtos.get(rowIndex);
+        ComboCaixa produtoSelecionado = produtos.get(rowIndex);
         String valueObject = null;
         switch (columnIndex) {
 //            case 0:
 //                valueObject = String.valueOf(produtoSelecionado.getId());
 //                break;
             case 0:
-                valueObject = produtoSelecionado.getProduto().getNome();
+                valueObject = produtoSelecionado.getProduto().getCombo().getNome();
                 break;
             case 1:
-                valueObject = String.valueOf(produtoSelecionado.getValorCusto());
+                valueObject = String.valueOf(produtoSelecionado.getProduto().getValorVenda());
                 break;
             case 2:
-                valueObject = String.valueOf(produtoSelecionado.getValorVenda());
+                valueObject = String.valueOf(produtoSelecionado.getQuantidade());
                 break;
             case 3:
-                valueObject = String.valueOf(produtoSelecionado.getEstoque());
-                break;
-            case 4:
-                
-                if(produtoSelecionado.getSobra() == null || produtoSelecionado.getSobra().equals("null")){
-                    valueObject = "0";
-                } else{
-                    valueObject = String.valueOf(produtoSelecionado.getSobra());
-                }
-                
-                break;
-            case 5:
-                
-                if(produtoSelecionado.getSobra() == null){
-                    valueObject = "0";
-                } else{
-                    valueObject = produtoSelecionado.getValorCusto().multiply(produtoSelecionado.getSobra()).toString();
-                }
-                
+                BigDecimal total = produtoSelecionado.getProduto()
+                        .getValorVenda().multiply(new BigDecimal(produtoSelecionado.getQuantidade()));
+                valueObject = String.valueOf(total);
                 break;
             default:
-                System.err.println("Índice inválido para propriedade do bean ProdutoEvento.class");
+                System.err.println("Índice inválido para propriedade do bean ComboCaixa.class");
         }
 
         return valueObject;
@@ -159,11 +128,9 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
         
         switch(columnIndex){
             case 0:
-                return false;
             case 1:
+                return false;
             case 2:
-            case 3:
-            case 4:
                 return true;
             default:
                 return false;
@@ -171,11 +138,11 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
 
     }
 
-    public ProdutoEvento getProduto(int indiceLinha) {
+    public ComboCaixa getProduto(int indiceLinha) {
         return produtos.get(indiceLinha);
     }
 
-    public void addProduto(ProdutoEvento p) {
+    public void addProduto(ComboCaixa p) {
         produtos.add(p);
 
         int ultimoIndice = getRowCount() - 1;
@@ -189,7 +156,7 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
         fireTableRowsDeleted(indiceLinha, indiceLinha);
     }
 
-    public void addListaDeProdutos(List<ProdutoEvento> novosProdutos) {
+    public void addListaDeProdutos(List<ComboCaixa> novosProdutos) {
 
         int tamanhoAntigo = getRowCount();
         produtos.addAll(novosProdutos);

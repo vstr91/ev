@@ -5,6 +5,7 @@
  */
 package model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -17,6 +18,7 @@ public class CaixaTableModel extends AbstractTableModel {
     private List<CaixaEvento> caixas;
     private String[] colunas = new String[]{"Caixa", "Quantidade", "Valor"};
     private int qtdTotalVendida = 0;
+    private BigDecimal valorTotalVendido = BigDecimal.ZERO;
 
     public int getQtdTotalVendida() {
         return qtdTotalVendida;
@@ -26,12 +28,21 @@ public class CaixaTableModel extends AbstractTableModel {
         this.qtdTotalVendida = qtdTotalVendida;
     }
 
+    public BigDecimal getValorTotalVendido() {
+        return valorTotalVendido;
+    }
+
+    public void setValorTotalVendido(BigDecimal valorTotalVendido) {
+        this.valorTotalVendido = valorTotalVendido;
+    }
+
     /**
      * Creates a new instance of DevmediaTableModel
      */
     public CaixaTableModel(List<CaixaEvento> caixas) {
         this.caixas = caixas;
         somarQuantidadeVendida();
+        somarValorVendido();
     }
 
     public CaixaTableModel() {
@@ -154,7 +165,19 @@ public class CaixaTableModel extends AbstractTableModel {
     public void somarQuantidadeVendida(){
         
         for(CaixaEvento caixa : caixas){
-            qtdTotalVendida = qtdTotalVendida + caixa.getNumero();
+            qtdTotalVendida = qtdTotalVendida + caixa.getTotalVendido();
+        }
+        
+    }
+    
+    public void somarValorVendido(){
+        
+        for(CaixaEvento caixa : caixas){
+            
+            if(caixa.getValorTotalVendido() != null){
+                valorTotalVendido.add(caixa.getValorTotalVendido());
+            }
+            
         }
         
     }
