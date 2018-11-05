@@ -16,7 +16,7 @@ import javax.swing.table.AbstractTableModel;
 public class CaixaTableModel extends AbstractTableModel {
 
     private List<CaixaEvento> caixas;
-    private String[] colunas = new String[]{"Caixa", "Quantidade", "Valor"};
+    private String[] colunas = new String[]{"Caixa", "Unid. Vend. (Desmembrando Combos)", "Valor"};
     private int qtdTotalVendida = 0;
     private BigDecimal valorTotalVendido = BigDecimal.ZERO;
 

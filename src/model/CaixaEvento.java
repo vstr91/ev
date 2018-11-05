@@ -105,5 +105,13 @@ public class CaixaEvento {
     public void setVendaVale(BigDecimal vendaVale) {
         this.vendaVale = vendaVale;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        
+        CaixaEvento ev = (CaixaEvento) obj;
+        
+        return this.getId().equals(ev.getId());
+    }
     
 }

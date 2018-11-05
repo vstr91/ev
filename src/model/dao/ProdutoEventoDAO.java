@@ -80,9 +80,33 @@ public class ProdutoEventoDAO {
     
     public List<ProdutoEvento> listarTodosPorEvento(Evento ev, int tipo) throws SQLException {
 
-        String query = "SELECT p.id, -1 AS evento, valor_custo, valor_venda, pe.id, pe.estoque, pe.sobra " +
-"FROM produto p LEFT JOIN produto_evento pe ON (p.id = pe.PRODUTO OR pe.PRODUTO IS NULL) " +
-"AND evento = ? WHERE p.tipo = ?";
+//        String query = "SELECT p.id, -1 AS evento, valor_custo, valor_venda, pe.id, pe.estoque, pe.sobra " +
+//"FROM produto p LEFT JOIN produto_evento pe ON (p.id = pe.PRODUTO OR pe.PRODUTO IS NULL) " +
+//"AND evento = ? WHERE p.tipo = ?";
+
+        String query = "";
+
+        if(tipo == 0){
+            query = "SELECT p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque, pe.estoque - COALESCE(SUM(pc.QUANTIDADE),0) as sobra " +
+            "FROM produto_evento pe LEFT JOIN " +
+            "     produto p ON p.ID = pe.PRODUTO LEFT JOIN " +
+            "     PRODUTO_CAIXA pc ON pc.PRODUTO_EVENTO = pe.ID LEFT JOIN " +
+            "     CAIXA_EVENTO c ON c.id = pc.CAIXA " +
+            "WHERE pe.evento = ? " +
+            "AND   p.TIPO = ? " +
+            "GROUP BY p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque";
+        } else{
+            query = "SELECT p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque, pe.estoque - COALESCE(SUM(pc.QUANTIDADE),0) as sobra " +
+            "FROM produto_evento pe LEFT JOIN " +
+            "     produto p ON p.ID = pe.PRODUTO LEFT JOIN " +
+            "     PRODUTO_BARRACA pc ON pc.PRODUTO_EVENTO = pe.ID LEFT JOIN " +
+            "     BARRACA_EVENTO c ON c.id = pc.BARRACA " +
+            "WHERE pe.evento = ? " +
+            "AND   p.TIPO = ? " +
+            "GROUP BY p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque";
+        }
+
+        
         PreparedStatement ps = null;
         List<ProdutoEvento> produtos = new ArrayList<>();
         ProdutoDAO produtoDAO = new ProdutoDAO();

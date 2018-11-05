@@ -5,6 +5,7 @@
  */
 package model.dao;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -66,18 +67,37 @@ public class CaixaEventoDAO {
     
     public List<CaixaEvento> listarTodosPorEvento(Evento ev) throws SQLException {
 
-        String query = "SELECT c.*, SUM(pc.quantidade), SUM(pe.VALOR_VENDA * pc.QUANTIDADE) " +
+        String queryProduto = "SELECT c.*, SUM(pc.quantidade), SUM(pe.VALOR_VENDA * pc.QUANTIDADE) " +
                 "FROM caixa_evento c LEFT JOIN " +
                 "     produto_caixa pc ON pc.CAIXA = c.ID LEFT JOIN " +
                 "     produto_evento pe ON pe.ID = pc.PRODUTO_EVENTO AND pe.evento = ? " +
                 "WHERE c.evento = ?" +
                 " GROUP BY c.id, c.NOME, c.NUMERO, c.EVENTO, c.VENDA_DEBITO, c.VENDA_CREDITO, c.VENDA_DINHEIRO, c.VENDA_VALE";
+        
+//        String queryCombo = "SELECT c.*, SUM(pc.quantidade), SUM(pe.VALOR_VENDA * pc.QUANTIDADE) " +
+//                "FROM caixa_evento c LEFT JOIN " +
+//                "     combo_caixa pc ON pc.CAIXA = c.ID LEFT JOIN " +
+//                "     combo_evento pe ON pe.ID = pc.COMBO_EVENTO AND pe.evento = ? " +
+//                "WHERE c.evento = ?" +
+//                " GROUP BY c.id, c.NOME, c.NUMERO, c.EVENTO, c.VENDA_DEBITO, c.VENDA_CREDITO, c.VENDA_DINHEIRO, c.VENDA_VALE";
+
+        String queryCombo = "SELECT c.*, SUM(pco.quantidade * pc.quantidade) AS qtd_und_prod_combos_vend, " +
+"pe.VALOR_VENDA * pc.QUANTIDADE AS vl_venda_combos " +
+"                FROM caixa_evento c LEFT JOIN " +
+"                     combo_caixa pc ON pc.CAIXA = c.ID LEFT JOIN " +
+"                     combo_evento pe ON pe.ID = pc.COMBO_EVENTO AND pe.evento = ? LEFT JOIN " +
+"                     PRODUTO_COMBO pco ON pco.COMBO = pe.COMBO LEFT JOIN " +
+"                     produto p ON p.ID = pco.PRODUTO " +
+"                WHERE c.evento = ? " +
+"                 GROUP BY c.id, c.NOME, c.NUMERO, c.EVENTO, c.VENDA_DEBITO, c.VENDA_CREDITO, c.VENDA_DINHEIRO, c.VENDA_VALE, " +
+"                         pe.VALOR_VENDA * pc.QUANTIDADE";
+        
         PreparedStatement ps = null;
         List<CaixaEvento> caixas = new ArrayList<>();
 
         try (Connection con = new ConnectionFactory().getConnection()) {
             
-            ps = con.prepareStatement(query);
+            ps = con.prepareStatement(queryProduto);
             ps.setInt(1, ev.getId());
             ps.setInt(2, ev.getId());
             ResultSet rs = ps.executeQuery();
@@ -102,6 +122,33 @@ public class CaixaEventoDAO {
                 caixaEvento.setValorTotalVendido(rs.getBigDecimal(10));
                 
                 caixas.add(caixaEvento);
+            }
+            
+            ps.close();
+            ps = null;
+            
+            //combo
+            
+            ps = con.prepareStatement(queryCombo);
+            ps.setInt(1, ev.getId());
+            ps.setInt(2, ev.getId());
+            ResultSet rsCombo = ps.executeQuery();
+            
+            while(rsCombo.next()){
+                CaixaEvento caixaEvento = new CaixaEvento();
+                caixaEvento.setId(rsCombo.getInt(1));
+
+                CaixaEvento ce = caixas.get(caixas.indexOf(caixaEvento));
+                
+                ce.setTotalVendido(ce.getTotalVendido()+rsCombo.getInt(9));
+                
+                BigDecimal bd = ce.getValorTotalVendido();
+                BigDecimal bd2 = rsCombo.getBigDecimal(10);
+                
+                if(ce.getValorTotalVendido() != null && bd2 != null){
+                    ce.setValorTotalVendido(bd.add(bd2));
+                }
+                
             }
             
             ps.close();
