@@ -121,13 +121,25 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
                 valueObject = produtoSelecionado.getProduto().getNome();
                 break;
             case 1:
-                valueObject = String.valueOf(produtoSelecionado.getValorCusto());
+                if(produtoSelecionado.getValorCusto()== null || produtoSelecionado.getValorCusto().equals("null")){
+                    valueObject = "0";
+                } else{
+                    valueObject = String.valueOf(produtoSelecionado.getValorCusto());
+                }
                 break;
             case 2:
-                valueObject = String.valueOf(produtoSelecionado.getValorVenda());
+                if(produtoSelecionado.getValorVenda()== null || produtoSelecionado.getValorVenda().equals("null")){
+                    valueObject = "0";
+                } else{
+                    valueObject = String.valueOf(produtoSelecionado.getValorVenda());
+                }
                 break;
             case 3:
-                valueObject = String.valueOf(produtoSelecionado.getEstoque());
+                if(produtoSelecionado.getEstoque()== null || produtoSelecionado.getEstoque().equals("null")){
+                    valueObject = "0";
+                } else{
+                    valueObject = String.valueOf(produtoSelecionado.getEstoque());
+                }
                 break;
             case 4:
                 
@@ -163,7 +175,6 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
             case 1:
             case 2:
             case 3:
-            case 4:
                 return true;
             default:
                 return false;

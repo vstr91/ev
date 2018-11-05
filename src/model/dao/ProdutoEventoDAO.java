@@ -88,20 +88,20 @@ public class ProdutoEventoDAO {
 
         if(tipo == 0){
             query = "SELECT p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque, pe.estoque - COALESCE(SUM(pc.QUANTIDADE),0) as sobra " +
-            "FROM produto_evento pe LEFT JOIN " +
-            "     produto p ON p.ID = pe.PRODUTO LEFT JOIN " +
+            "FROM produto p LEFT JOIN " +
+            "     produto_evento pe ON p.ID = pe.PRODUTO LEFT JOIN " +
             "     PRODUTO_CAIXA pc ON pc.PRODUTO_EVENTO = pe.ID LEFT JOIN " +
             "     CAIXA_EVENTO c ON c.id = pc.CAIXA " +
-            "WHERE pe.evento = ? " +
+            "WHERE (pe.evento = ? OR pe.evento IS NULL)" +
             "AND   p.TIPO = ? " +
             "GROUP BY p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque";
         } else{
             query = "SELECT p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque, pe.estoque - COALESCE(SUM(pc.QUANTIDADE),0) as sobra " +
-            "FROM produto_evento pe LEFT JOIN " +
-            "     produto p ON p.ID = pe.PRODUTO LEFT JOIN " +
+            "FROM produto p LEFT JOIN " +
+            "     produto_evento pe ON p.ID = pe.PRODUTO LEFT JOIN " +
             "     PRODUTO_BARRACA pc ON pc.PRODUTO_EVENTO = pe.ID LEFT JOIN " +
             "     BARRACA_EVENTO c ON c.id = pc.BARRACA " +
-            "WHERE pe.evento = ? " +
+            "WHERE (pe.evento = ? OR pe.evento IS NULL) " +
             "AND   p.TIPO = ? " +
             "GROUP BY p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque";
         }
@@ -171,7 +171,7 @@ public class ProdutoEventoDAO {
             ps.setInt(3, produtoEvento.getEvento().getId());
             ps.setInt(4, produtoEvento.getProduto().getId());
             ps.setBigDecimal(5, produtoEvento.getEstoque());
-            ps.setBigDecimal(5, produtoEvento.getSobra());
+            ps.setBigDecimal(6, produtoEvento.getSobra());
             ps.execute();
             ps.close();
             
