@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import javax.swing.table.AbstractTableModel;
 import model.dao.ComboCaixaDAO;
 import model.dao.ProdutoCaixaDAO;
+import utils.FormatUtils;
 
 /**
  *
@@ -106,7 +107,7 @@ public class ComboCaixaTableModel extends AbstractTableModel {
                 valueObject = produtoSelecionado.getProduto().getCombo().getNome();
                 break;
             case 1:
-                valueObject = String.valueOf(produtoSelecionado.getProduto().getValorVenda());
+                valueObject = FormatUtils.formataDinheiroExibicao(produtoSelecionado.getProduto().getValorVenda());
                 break;
             case 2:
                 valueObject = String.valueOf(produtoSelecionado.getQuantidade());
@@ -114,7 +115,7 @@ public class ComboCaixaTableModel extends AbstractTableModel {
             case 3:
                 BigDecimal total = produtoSelecionado.getProduto()
                         .getValorVenda().multiply(new BigDecimal(produtoSelecionado.getQuantidade()));
-                valueObject = String.valueOf(total);
+                valueObject = FormatUtils.formataDinheiroExibicao(total);
                 break;
             default:
                 System.err.println("Índice inválido para propriedade do bean ComboCaixa.class");

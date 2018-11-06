@@ -17,6 +17,7 @@ import model.ProdutoBarraca;
 import model.ProdutoBarracaTableModel;
 import model.ProdutoCaixa;
 import model.dao.ProdutoBarracaDAO;
+import utils.FormatUtils;
 
 /**
  *
@@ -63,7 +64,7 @@ public class BarracaView extends javax.swing.JDialog {
             totalUnidades = totalUnidades + p.getQuantidade();
         }
 
-        labelVendas.setText(total.toString());
+        labelVendas.setText(FormatUtils.formataDinheiroExibicao(total));
         labelUnidades.setText(String.valueOf(totalUnidades));
 
         tableProdutos.getModel().addTableModelListener(new TableModelListener() {
@@ -77,7 +78,7 @@ public class BarracaView extends javax.swing.JDialog {
                     totalUnidades = totalUnidades + p.getQuantidade();
                 }
 
-                labelVendas.setText(total.toString());
+                labelVendas.setText(FormatUtils.formataDinheiroExibicao(total));
                 labelUnidades.setText(String.valueOf(totalUnidades));
             }
         });

@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.AbstractTableModel;
 import model.dao.ComboEventoDAO;
+import utils.FormatUtils;
 
 /**
  *
@@ -79,10 +80,10 @@ public class ComboEventoTableModel extends AbstractTableModel {
 //            case 1:
 //                produto.setProduto((Produto) aValue);
             case 1:
-                produto.setValorCusto(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
+                produto.setValorCusto(BigDecimal.valueOf(Integer.valueOf(FormatUtils.ajustaFormato((String) aValue))));
                 break;
             case 2:
-                produto.setValorVenda(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
+                produto.setValorVenda(BigDecimal.valueOf(Integer.valueOf(FormatUtils.ajustaFormato((String) aValue))));
                 break;
             default:
                 System.err.println("Índice da coluna inválido");
@@ -110,10 +111,10 @@ public class ComboEventoTableModel extends AbstractTableModel {
                 valueObject = produtoSelecionado.getCombo().getNome();
                 break;
             case 1:
-                valueObject = String.valueOf(produtoSelecionado.getValorCusto());
+                valueObject = FormatUtils.formataDinheiroExibicao(produtoSelecionado.getValorCusto());
                 break;
             case 2:
-                valueObject = String.valueOf(produtoSelecionado.getValorVenda());
+                valueObject = FormatUtils.formataDinheiroExibicao(produtoSelecionado.getValorVenda());
                 break;
             default:
                 System.err.println("Índice inválido para propriedade do bean ComboEvento.class");

@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.AbstractTableModel;
 import model.dao.ProdutoCamarimDAO;
+import utils.FormatUtils;
 
 /**
  *
@@ -120,7 +121,7 @@ public class ProdutoCamarimTableModel extends AbstractTableModel {
                 valueObject = produtoSelecionado.getProduto().getProduto().getNome();
                 break;
             case 1:
-                valueObject = String.valueOf(produtoSelecionado.getProduto().getValorVenda());
+                valueObject = FormatUtils.formataDinheiroExibicao(produtoSelecionado.getProduto().getValorVenda());
                 break;
             case 2:
                 valueObject = String.valueOf(produtoSelecionado.getAvaria());
@@ -142,7 +143,7 @@ public class ProdutoCamarimTableModel extends AbstractTableModel {
                 Integer totalQuantidade = produtoSelecionado.getAvaria()+produtoSelecionado.getCacau()+produtoSelecionado.getProducao()+produtoSelecionado.getSocios();
                 BigDecimal total = produtoSelecionado.getProduto()
                         .getValorVenda().multiply(new BigDecimal(totalQuantidade));
-                valueObject = String.valueOf(total);
+                valueObject = FormatUtils.formataDinheiroExibicao(total);
                 break;
             default:
                 System.err.println("Índice inválido para propriedade do bean ProdutoEvento.class");

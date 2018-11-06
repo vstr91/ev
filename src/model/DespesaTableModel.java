@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import utils.FormatUtils;
 
 /**
  *
@@ -89,11 +90,11 @@ public class DespesaTableModel extends AbstractTableModel {
             case 0:
                 despesa.setNome(aValue.toString());
             case 1:
-                despesa.setValorUnitario(new BigDecimal((String) aValue));
+                despesa.setValorUnitario(new BigDecimal(FormatUtils.ajustaFormato((String) aValue)));
             case 2:
                 despesa.setQuantidade((Integer) aValue);
             case 4:
-                despesa.setValorPago(new BigDecimal((String) aValue));
+                despesa.setValorPago(new BigDecimal(FormatUtils.ajustaFormato((String) aValue)));
             case 6:
                 despesa.setObservacao(aValue.toString());
             default:
@@ -113,20 +114,20 @@ public class DespesaTableModel extends AbstractTableModel {
                 valueObject = despesaSelecionado.getNome();
                 break;
             case 1:
-                valueObject = despesaSelecionado.getValorUnitario().toString();
+                valueObject = FormatUtils.formataDinheiroExibicao(despesaSelecionado.getValorUnitario());
                 break;
             case 2:
                 valueObject = String.valueOf(despesaSelecionado.getQuantidade());
                 break;
             case 3:
-                valueObject = String.valueOf(despesaSelecionado.getValorUnitario().multiply(new BigDecimal(despesaSelecionado.getQuantidade())));
+                valueObject = FormatUtils.formataDinheiroExibicao(despesaSelecionado.getValorUnitario().multiply(new BigDecimal(despesaSelecionado.getQuantidade())));
                 break;
             case 4:
-                valueObject = despesaSelecionado.getValorPago().toString();
+                valueObject = FormatUtils.formataDinheiroExibicao(despesaSelecionado.getValorPago());
                 break;
             case 5:
-                valueObject = despesaSelecionado.getValorUnitario().multiply(new BigDecimal(despesaSelecionado.getQuantidade()))
-                        .subtract(despesaSelecionado.getValorPago()).toString();
+                valueObject = FormatUtils.formataDinheiroExibicao(despesaSelecionado.getValorUnitario().multiply(new BigDecimal(despesaSelecionado.getQuantidade()))
+                        .subtract(despesaSelecionado.getValorPago()));
                 break;
             case 6:
                 valueObject = despesaSelecionado.getObservacao();

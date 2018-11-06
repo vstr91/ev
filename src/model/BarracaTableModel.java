@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import utils.FormatUtils;
 
 /**
  *
@@ -115,7 +116,7 @@ public class BarracaTableModel extends AbstractTableModel {
                 valueObject = String.valueOf(barracaSelecionada.getTotalVendido()) == "null" ? "0" : String.valueOf(barracaSelecionada.getTotalVendido());
                 break;
             case 2:
-                valueObject = String.valueOf(barracaSelecionada.getValorTotalVendido()) == "null" ? "0" : String.valueOf(barracaSelecionada.getValorTotalVendido());               
+                valueObject = String.valueOf(barracaSelecionada.getValorTotalVendido()) == "null" ? "R$ 0" : FormatUtils.formataDinheiroExibicao(barracaSelecionada.getValorTotalVendido());               
                 break;
             default:
                 System.err.println("Índice inválido para propriedade do bean BarracaEvento.class");

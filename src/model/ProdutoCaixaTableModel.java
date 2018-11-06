@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.AbstractTableModel;
 import model.dao.ProdutoCaixaDAO;
+import utils.FormatUtils;
 
 /**
  *
@@ -104,7 +105,7 @@ public class ProdutoCaixaTableModel extends AbstractTableModel {
                 valueObject = produtoSelecionado.getProduto().getProduto().getNome();
                 break;
             case 1:
-                valueObject = String.valueOf(produtoSelecionado.getProduto().getValorVenda());
+                valueObject = FormatUtils.formataDinheiroExibicao(produtoSelecionado.getProduto().getValorVenda());
                 break;
             case 2:
                 valueObject = String.valueOf(produtoSelecionado.getQuantidade());
@@ -112,10 +113,10 @@ public class ProdutoCaixaTableModel extends AbstractTableModel {
             case 3:
                 BigDecimal total = produtoSelecionado.getProduto()
                         .getValorVenda().multiply(new BigDecimal(produtoSelecionado.getQuantidade()));
-                valueObject = String.valueOf(total);
+                valueObject = FormatUtils.formataDinheiroExibicao(total);
                 break;
             default:
-                System.err.println("Índice inválido para propriedade do bean ProdutoEvento.class");
+                System.err.println("Índice inválido para propriedade do bean ProdutoCaixa.class");
         }
 
         return valueObject;

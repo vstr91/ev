@@ -145,7 +145,11 @@ public class CaixaEventoDAO {
                 BigDecimal bd = ce.getValorTotalVendido();
                 BigDecimal bd2 = rsCombo.getBigDecimal(10);
                 
-                if(ce.getValorTotalVendido() != null && bd2 != null){
+                if(ce.getValorTotalVendido() == null){
+                    bd = BigDecimal.ZERO;
+                }
+                
+                if(bd2 != null){
                     ce.setValorTotalVendido(bd.add(bd2));
                 }
                 

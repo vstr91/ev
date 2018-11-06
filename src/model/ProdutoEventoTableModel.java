@@ -6,6 +6,7 @@
 package model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.logging.Logger;
 import javax.swing.table.AbstractTableModel;
 import model.dao.ProdutoDAO;
 import model.dao.ProdutoEventoDAO;
+import utils.FormatUtils;
 
 /**
  *
@@ -21,7 +23,7 @@ import model.dao.ProdutoEventoDAO;
 public class ProdutoEventoTableModel extends AbstractTableModel {
 
     private List<ProdutoEvento> produtos;
-    private String[] colunas = new String[]{"Nome", "Valor Custo", "Valor Venda", "Estoque", "Sobra", "A Pagar"};
+    private String[] colunas = new String[]{"Nome", "Valor Custo", "Valor Venda", "Estoque Inicial", "Vendido", "Sobra (Em Und.)", "A Pagar"};
     ProdutoEventoDAO produtoEventoDAO = new ProdutoEventoDAO();
 
     /**
@@ -69,6 +71,7 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
         fireTableCellUpdated(rowIndex, 2);
         fireTableCellUpdated(rowIndex, 3);
         fireTableCellUpdated(rowIndex, 4);
+        fireTableCellUpdated(rowIndex, 5);
 
     }
 
@@ -84,15 +87,18 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
 //            case 1:
 //                produto.setProduto((Produto) aValue);
             case 1:
-                produto.setValorCusto(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
+                produto.setValorCusto(BigDecimal.valueOf(Double.parseDouble(FormatUtils.ajustaFormato( (String) aValue))));
                 break;
             case 2:
-                produto.setValorVenda(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
+                produto.setValorVenda(BigDecimal.valueOf(Double.parseDouble(FormatUtils.ajustaFormato( (String) aValue))));
                 break;
             case 3:
                 produto.setEstoque(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
                 break;
             case 4:
+                produto.setVendas(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
+                break;
+            case 5:
                 produto.setSobra(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
                 break;
             default:
@@ -124,38 +130,78 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
                 if(produtoSelecionado.getValorCusto()== null || produtoSelecionado.getValorCusto().equals("null")){
                     valueObject = "0";
                 } else{
-                    valueObject = String.valueOf(produtoSelecionado.getValorCusto());
+                    valueObject = FormatUtils.formataDinheiroExibicao(produtoSelecionado.getValorCusto());
                 }
                 break;
             case 2:
                 if(produtoSelecionado.getValorVenda()== null || produtoSelecionado.getValorVenda().equals("null")){
                     valueObject = "0";
                 } else{
-                    valueObject = String.valueOf(produtoSelecionado.getValorVenda());
+                    valueObject = FormatUtils.formataDinheiroExibicao(produtoSelecionado.getValorVenda());
                 }
                 break;
             case 3:
                 if(produtoSelecionado.getEstoque()== null || produtoSelecionado.getEstoque().equals("null")){
                     valueObject = "0";
                 } else{
-                    valueObject = String.valueOf(produtoSelecionado.getEstoque());
+                    valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getEstoque());
                 }
                 break;
             case 4:
+                if(produtoSelecionado.getVendas()== null || produtoSelecionado.getVendas().equals("null")){
+                    valueObject = "0";
+                } else{
+                    
+                    if(produtoSelecionado.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")){
+                        valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getVendas())+" doses / "
+                                +produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()))+" unidades";
+                    } else{
+                        valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getVendas());
+                    }
+                    
+                }
+                break;
+            case 5:
                 
                 if(produtoSelecionado.getSobra() == null || produtoSelecionado.getSobra().equals("null")){
                     valueObject = "0";
                 } else{
-                    valueObject = String.valueOf(produtoSelecionado.getSobra());
+                    
+                    if(produtoSelecionado.getVendas() == null){
+                        produtoSelecionado.setVendas(BigDecimal.ZERO);
+                    }
+                    
+                    if(produtoSelecionado.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")){
+                        valueObject = 
+                                FormatUtils.formataDecimalExibicao(produtoSelecionado.getEstoque()
+                                        .subtract(produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()))
+                                        ));
+                    } else{
+                        valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getEstoque().subtract(produtoSelecionado.getVendas()));
+                    }
+                    
                 }
                 
                 break;
-            case 5:
+            case 6:
                 
                 if(produtoSelecionado.getSobra() == null){
                     valueObject = "0";
                 } else{
-                    valueObject = produtoSelecionado.getValorCusto().multiply(produtoSelecionado.getSobra()).toString();
+                    
+                    if(produtoSelecionado.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")){
+                        valueObject = 
+                                FormatUtils.formataDinheiroExibicao(produtoSelecionado.getValorCusto()
+                                        .multiply(produtoSelecionado.getEstoque()
+                                        .subtract(produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()))
+                                        ).setScale(0, RoundingMode.DOWN)));
+                    } else{
+                        valueObject = FormatUtils
+                            .formataDinheiroExibicao(produtoSelecionado.getValorCusto().multiply(produtoSelecionado.getEstoque()
+                                    .subtract(produtoSelecionado.getVendas())));
+                    }
+                    
+                    
                 }
                 
                 break;

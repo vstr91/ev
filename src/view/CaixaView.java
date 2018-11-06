@@ -21,6 +21,7 @@ import model.ProdutoCaixaTableModel;
 import model.dao.CaixaEventoDAO;
 import model.dao.ComboCaixaDAO;
 import model.dao.ProdutoCaixaDAO;
+import utils.FormatUtils;
 
 /**
  *
@@ -59,10 +60,10 @@ public class CaixaView extends javax.swing.JDialog {
         this.caixa = caixa;
         labelCaixa.setText(caixa.getNome());
 
-        textFieldCredito.setText(caixa.getVendaCredito().toString());
-        textFieldDebito.setText(caixa.getVendaDebito().toString());
-        textFieldDinheiro.setText(caixa.getVendaDinheiro().toString());
-        textFieldVale.setText(caixa.getVendaVale().toString());
+        textFieldCredito.setText(FormatUtils.formataDinheiroExibicao(caixa.getVendaCredito()));
+        textFieldDebito.setText(FormatUtils.formataDinheiroExibicao(caixa.getVendaDebito()));
+        textFieldDinheiro.setText(FormatUtils.formataDinheiroExibicao(caixa.getVendaDinheiro()));
+        textFieldVale.setText(FormatUtils.formataDinheiroExibicao(caixa.getVendaVale()));
 
         try {
             produtos = produtoCaixaDAO.listarTodosPorCaixaEvento(caixa);
@@ -92,7 +93,7 @@ public class CaixaView extends javax.swing.JDialog {
             totalUnidades = totalUnidades + c.getQuantidade();
         }
 
-        labelTotalVendas.setText(total.toString());
+        labelTotalVendas.setText(FormatUtils.formataDinheiroExibicao(total));
         labelUnidades.setText(String.valueOf(totalUnidades));
 
         tableProdutos.getModel().addTableModelListener(new TableModelListener() {
@@ -451,26 +452,26 @@ public class CaixaView extends javax.swing.JDialog {
         vendaVale = BigDecimal.ZERO;
 
         if (!textFieldDebito.getText().trim().isEmpty()) {
-            vendaDebito = new BigDecimal(textFieldDebito.getText().trim());
+            vendaDebito = new BigDecimal(FormatUtils.ajustaFormato(textFieldDebito.getText().trim()));
         }
 
         if (!textFieldCredito.getText().trim().isEmpty()) {
-            vendaCredito = new BigDecimal(textFieldCredito.getText().trim());
+            vendaCredito = new BigDecimal(FormatUtils.ajustaFormato(textFieldCredito.getText().trim()));
         }
 
         if (!textFieldDinheiro.getText().trim().isEmpty()) {
-            vendaDinheiro = new BigDecimal(textFieldDinheiro.getText().trim());
+            vendaDinheiro = new BigDecimal(FormatUtils.ajustaFormato(textFieldDinheiro.getText().trim()));
         }
 
         if (!textFieldVale.getText().trim().isEmpty()) {
-            vendaVale = new BigDecimal(textFieldVale.getText().trim());
+            vendaVale = new BigDecimal(FormatUtils.ajustaFormato(textFieldVale.getText().trim()));
         }
 
         BigDecimal totalVendido = BigDecimal.ZERO;
         totalVendido = totalVendido.add(vendaDebito).add(vendaCredito).add(vendaDinheiro).add(vendaVale);
 
-        labelTotal.setText(totalVendido.toString());
-        labelDiferenca.setText(totalVendido.subtract(total).toString());
+        labelTotal.setText(FormatUtils.formataDinheiroExibicao(totalVendido));
+        labelDiferenca.setText(FormatUtils.formataDinheiroExibicao(totalVendido.subtract(total)));
     }
 
     private void recalcularValores() {
@@ -487,7 +488,7 @@ public class CaixaView extends javax.swing.JDialog {
             totalUnidades = totalUnidades + c.getQuantidade();
         }
 
-        labelTotalVendas.setText(total.toString());
+        labelTotalVendas.setText(FormatUtils.formataDinheiroExibicao(total));
         labelUnidades.setText(String.valueOf(totalUnidades));
 
         recalculaTotais();
