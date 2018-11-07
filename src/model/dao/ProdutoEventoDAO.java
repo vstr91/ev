@@ -156,6 +156,68 @@ public class ProdutoEventoDAO {
         
     }
 
+    public List<ProdutoEvento> listarTodosPorEvento(Evento ev) throws SQLException {
+
+//        String query = "SELECT p.id, -1 AS evento, valor_custo, valor_venda, pe.id, pe.estoque, pe.sobra " +
+//"FROM produto p LEFT JOIN produto_evento pe ON (p.id = pe.PRODUTO OR pe.PRODUTO IS NULL) " +
+//"AND evento = ? WHERE p.tipo = ?";
+
+        String query = "SELECT p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque, pe.estoque - COALESCE(SUM(pc.QUANTIDADE),0) as sobra, "
+                    + "SUM(pc.QUANTIDADE) " +
+            "FROM produto p LEFT JOIN " +
+            "     produto_evento pe ON p.ID = pe.PRODUTO LEFT JOIN " +
+            "     PRODUTO_CAIXA pc ON pc.PRODUTO_EVENTO = pe.ID LEFT JOIN " +
+            "     CAIXA_EVENTO c ON c.id = pc.CAIXA " +
+            "WHERE (pe.evento = ? OR pe.evento IS NULL)" +
+            "GROUP BY p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque";
+
+        
+        PreparedStatement ps = null;
+        List<ProdutoEvento> produtos = new ArrayList<>();
+        ProdutoDAO produtoDAO = new ProdutoDAO();
+        EventoDAO eventoDAO = new EventoDAO();
+
+        try (Connection con = new ConnectionFactory().getConnection()) {
+            
+            ps = con.prepareStatement(query);
+            ps.setInt(1, ev.getId());
+            ResultSet rs = ps.executeQuery();
+            
+            while(rs.next()){
+                ProdutoEvento produtoEvento = new ProdutoEvento();
+                
+                Produto produto = new Produto();
+                produto.setId(rs.getInt(1));
+                produto = produtoDAO.carregar(produto);
+                
+                produtoEvento.setProduto(produto);
+                
+                produtoEvento.setEvento(ev);
+                produtoEvento.setValorCusto(rs.getBigDecimal(3));
+                produtoEvento.setValorVenda(rs.getBigDecimal(4));
+                produtoEvento.setId(rs.getInt(5));
+                produtoEvento.setEstoque(rs.getBigDecimal(6));
+                produtoEvento.setSobra(rs.getBigDecimal(7));
+                produtoEvento.setVendas(rs.getBigDecimal(8));
+                
+                produtos.add(produtoEvento);
+            }
+            
+            ps.close();
+            
+        } catch (SQLException e) {
+            System.out.println(e);
+            
+            if(ps != null){
+                ps.close();
+            }
+            
+        }
+        
+        return produtos;
+        
+    }
+    
     public void salvar(ProdutoEvento produtoEvento) throws SQLException {
 
         String query = "INSERT INTO produto_evento (valor_custo, valor_venda, evento, produto, estoque, sobra) "

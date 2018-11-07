@@ -26,6 +26,7 @@ public class FormatUtils {
         valor = valor.replace(".", "");
         valor = valor.replace(",", ".");
         valor = valor.replace(NumberFormat.getCurrencyInstance().getCurrency().getSymbol(), "");
+        valor = valor.replace("- ", "-");
         return valor.trim();
     }
     

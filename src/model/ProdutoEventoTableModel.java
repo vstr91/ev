@@ -154,7 +154,7 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
                     
                     if(produtoSelecionado.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")){
                         valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getVendas())+" doses / "
-                                +produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()))+" unidades";
+                                +produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()), 2, RoundingMode.HALF_EVEN)+" unidades";
                     } else{
                         valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getVendas());
                     }
@@ -174,7 +174,7 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
                     if(produtoSelecionado.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")){
                         valueObject = 
                                 FormatUtils.formataDecimalExibicao(produtoSelecionado.getEstoque()
-                                        .subtract(produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()))
+                                        .subtract(produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()), 2, RoundingMode.HALF_EVEN)
                                         ));
                     } else{
                         valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getEstoque().subtract(produtoSelecionado.getVendas()));
@@ -193,7 +193,7 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
                         valueObject = 
                                 FormatUtils.formataDinheiroExibicao(produtoSelecionado.getValorCusto()
                                         .multiply(produtoSelecionado.getEstoque()
-                                        .subtract(produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()))
+                                        .subtract(produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()), 2, RoundingMode.HALF_EVEN)
                                         ).setScale(0, RoundingMode.DOWN)));
                     } else{
                         valueObject = FormatUtils

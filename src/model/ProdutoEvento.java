@@ -86,5 +86,13 @@ public class ProdutoEvento {
     public void setVendas(BigDecimal vendas) {
         this.vendas = vendas;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        
+        ProdutoEvento p = (ProdutoEvento) obj;
+        
+        return this.getId().equals(p.getId());
+    }
     
 }

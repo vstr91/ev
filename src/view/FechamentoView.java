@@ -116,6 +116,8 @@ public class FechamentoView extends javax.swing.JDialog {
                     
                 }
                 
+                System.out.println("SOBRA BAR: "+sobra.toString());
+                
                 for(ProdutoEvento pe : produtosBarraca){
                     
                     if(pe.getSobra() != null && pe.getValorCusto() != null){
@@ -123,6 +125,8 @@ public class FechamentoView extends javax.swing.JDialog {
                     }
                     
                 }
+                
+                System.out.println("SOBRA BARRACA: "+sobra.toString());
                 
 //                estoque = produtoEventoDAO.listarTodosPorEvento(evento, 0);
 //                
@@ -206,6 +210,11 @@ public class FechamentoView extends javax.swing.JDialog {
 
             calculaTotalBrutoBar();
             recarregarTotalDespesas();
+            
+            if(!verificarEstoque()){
+                JOptionPane.showMessageDialog(this, "Por favor verifique o cadastro de estoque dos produtos "
+                        + "antes de realizar o lançamento das vendas.", "Estoque Zerado", JOptionPane.ERROR_MESSAGE);
+            }
 
         }
 
@@ -365,21 +374,21 @@ public class FechamentoView extends javax.swing.JDialog {
         jLabel3.setText("Total Bruto do Bar:");
 
         labelTotalBrutoBar.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        labelTotalBrutoBar.setText("130.000");
+        labelTotalBrutoBar.setText("0");
 
         jLabel5.setText("Total Despesas (A + B):");
 
-        labelDespesas.setText("30.000");
+        labelDespesas.setText("0");
 
         jLabel6.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel6.setText("Total Líquido Bar:");
 
         labelTotalLiquido.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        labelTotalLiquido.setText("100.000");
+        labelTotalLiquido.setText("0");
 
         jLabel8.setText("Administração Bar 13%:");
 
-        labelAdministracaoBar.setText("1300");
+        labelAdministracaoBar.setText("0");
 
         jLabel10.setText("Repasse Produção:");
 
@@ -1155,7 +1164,7 @@ public class FechamentoView extends javax.swing.JDialog {
 
         labelTotalBrutoBar.setText(FormatUtils.formataDinheiroExibicao(totalBruto));
         
-        recarregarTotaisFechamento();
+        recarregarTotalDespesas();
 
     }
     
@@ -1212,10 +1221,18 @@ public class FechamentoView extends javax.swing.JDialog {
     }
     
     private void recarregarTotaisFechamento(){
+        BigDecimal totalBruto = BigDecimal.ZERO;
+        BigDecimal totalDespesas = BigDecimal.ZERO;
+        BigDecimal totalLiquido = BigDecimal.ZERO;
         
-        BigDecimal totalBruto = new BigDecimal(FormatUtils.ajustaFormato(labelTotalBrutoBar.getText()));
-        BigDecimal totalDespesas = new BigDecimal(FormatUtils.ajustaFormato(labelDespesas.getText()));
-        BigDecimal totalLiquido = totalBruto.subtract(totalDespesas);
+        try{
+            totalBruto = new BigDecimal(FormatUtils.ajustaFormato(labelTotalBrutoBar.getText()));
+            totalDespesas = new BigDecimal(FormatUtils.ajustaFormato(labelDespesas.getText()));
+            totalLiquido = totalBruto.subtract(totalDespesas);
+        } catch(NumberFormatException e){
+            e.printStackTrace();
+            System.out.println("DESP: "+labelDespesas.getText());
+        }
         
         labelTotalLiquido.setText(FormatUtils.formataDinheiroExibicao(totalLiquido));
         
@@ -1230,6 +1247,23 @@ public class FechamentoView extends javax.swing.JDialog {
         labelRepasseProducao.setText(FormatUtils.formataDinheiroExibicao(repasseProducao));
         labelRepasseFinal.setText(FormatUtils.formataDinheiroExibicao(repasseProducao.subtract(consumoCamarim)));
         
+    }
+    
+    private boolean verificarEstoque(){
+        BigDecimal estoque = BigDecimal.ZERO;
+        
+        try {
+            List<ProdutoEvento> produtos = produtoEventoDAO.listarTodosPorEvento(evento, 0);
+            
+            for(ProdutoEvento p : produtos){
+                estoque = estoque.add(p.getEstoque());
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return estoque.intValue() > 0;
     }
 
 

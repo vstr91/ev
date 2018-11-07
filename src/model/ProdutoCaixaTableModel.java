@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 import model.dao.ProdutoCaixaDAO;
 import utils.FormatUtils;
@@ -23,9 +25,11 @@ public class ProdutoCaixaTableModel extends AbstractTableModel {
     private List<ProdutoCaixa> produtos;
     private String[] colunas = new String[]{"Produto", "Valor Venda", "Quantidade", "Total"};
     ProdutoCaixaDAO produtoCaixaDAO = new ProdutoCaixaDAO();
+    JDialog parent;
 
-    public ProdutoCaixaTableModel(List<ProdutoCaixa> produtos) {
+    public ProdutoCaixaTableModel(List<ProdutoCaixa> produtos, JDialog parent) {
         this.produtos = produtos;
+        this.parent = parent;
     }
 
     public ProdutoCaixaTableModel() {
@@ -68,6 +72,15 @@ public class ProdutoCaixaTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         ProdutoCaixa produto = produtos.get(rowIndex);
+        int quantidade = 0;
+        int estoque = produto.getProduto().getEstoque().intValue();
+        int vendas = 0;
+        
+        if(produto.getProduto().getVendas() != null){
+            vendas = produto.getProduto().getVendas().intValue();
+        }
+        
+        
 
         switch (columnIndex) {
 //            case 0:
@@ -77,7 +90,12 @@ public class ProdutoCaixaTableModel extends AbstractTableModel {
 //            case 1:
 //                produto.setProduto((Produto) aValue);
             case 2:
-                produto.setQuantidade(Integer.valueOf((String) aValue));
+                quantidade = Integer.valueOf((String) aValue);
+                
+                //if((estoque - vendas) >= quantidade){
+                    produto.setQuantidade(quantidade);
+                //}
+                
                 break;
             default:
                 System.err.println("Índice da coluna inválido");
@@ -85,7 +103,14 @@ public class ProdutoCaixaTableModel extends AbstractTableModel {
         }
         
         try {
-            produtoCaixaDAO.editar(produto);
+            
+            //if((estoque - vendas) >= quantidade){
+                produtoCaixaDAO.editar(produto);
+//            } else{
+//                JOptionPane.showMessageDialog(parent, "Estoque menor que valor informado! "
+//                        + "O estoque cadastrado para o produto é de "+(estoque - vendas)+" unidades.", "Estoque Insuficiente", JOptionPane.ERROR_MESSAGE);
+//            }
+            
         } catch (SQLException ex) {
             Logger.getLogger(ProdutoCaixaTableModel.class.getName()).log(Level.SEVERE, null, ex);
         }

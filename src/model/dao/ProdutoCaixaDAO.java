@@ -27,10 +27,18 @@ public class ProdutoCaixaDAO {
     
     public List<ProdutoCaixa> listarTodosPorCaixaEvento(CaixaEvento ev) throws SQLException {
 
-        String query = "SELECT p.ID, pe.EVENTO, pc.CAIXA, pc.QUANTIDADE " +
+        String query = "SELECT p.ID, pe.EVENTO, pc.CAIXA, pc.QUANTIDADE,"
+                + "(" +
+"    SELECT SUM(quantidade) " +
+"    FROM PRODUTO_CAIXA pc2 INNER JOIN " +
+"         PRODUTO_EVENTO pe2 ON pe2.PRODUTO = pc2.PRODUTO_EVENTO " +
+"    WHERE pc2.PRODUTO_EVENTO = pc.PRODUTO_EVENTO " +
+"    AND pe2.EVENTO = pe.EVENTO " +
+") " +
 "FROM produto p LEFT JOIN produto_evento pe ON pe.PRODUTO = p.ID LEFT JOIN " +
 "PRODUTO_CAIXA pc ON (pc.PRODUTO_EVENTO = pe.ID AND (pc.CAIXA = ? OR pc.CAIXA IS NULL)) " +
 "WHERE pe.evento = ? AND (pc.CAIXA = ? OR pc.CAIXA IS NULL) AND p.tipo = 0";
+
         PreparedStatement ps = null;
         List<ProdutoCaixa> produtos = new ArrayList<>();
         ProdutoDAO produtoDAO = new ProdutoDAO();
@@ -56,6 +64,8 @@ public class ProdutoCaixaDAO {
                 produtoEvento.setProduto(produto);
                 
                 produtoEvento = produtoEventoDAO.carregar(produtoEvento);
+                
+                produtoEvento.setVendas(rs.getBigDecimal(5));
                 
                 produtoCaixa.setProduto(produtoEvento);
                 

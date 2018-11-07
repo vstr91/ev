@@ -67,7 +67,7 @@ public class CaixaView extends javax.swing.JDialog {
 
         try {
             produtos = produtoCaixaDAO.listarTodosPorCaixaEvento(caixa);
-            tableModelProdutoCaixa = new ProdutoCaixaTableModel(produtos);
+            tableModelProdutoCaixa = new ProdutoCaixaTableModel(produtos, this);
             tableProdutos.setModel(tableModelProdutoCaixa);
 
             combos = comboCaixaDAO.listarTodosPorCaixaEvento(caixa);
