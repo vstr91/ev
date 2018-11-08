@@ -8,6 +8,7 @@ package view;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
@@ -18,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.text.MaskFormatter;
 import model.BarracaEvento;
 import model.BarracaTableModel;
 import model.CaixaEvento;
@@ -35,6 +37,7 @@ import model.dao.ProdutoCamarimDAO;
 import model.dao.ProdutoEventoDAO;
 import org.joda.time.format.DateTimeFormat;
 import utils.FormatUtils;
+import utils.JNumberFormatField;
 
 /**
  *
@@ -110,13 +113,21 @@ public class FechamentoView extends javax.swing.JDialog {
                 for(ProdutoEvento pe : produtosBar){
                     
                     if(pe.getSobra() != null && pe.getValorCusto() != null){
-                        sobra = sobra.add(pe.getSobra().multiply(pe.getValorCusto()));
+                        
+                        if(pe.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")){
+                            BigDecimal valorCusto = pe.getValorCusto();
+                            BigDecimal sobraUnd = pe.getEstoque()
+                                        .subtract(pe.getVendas()
+                                                .divide(new BigDecimal(pe.getProduto().getDoses()), 2, RoundingMode.HALF_EVEN));
+                            
+                            sobra = sobra.add(sobraUnd.multiply(valorCusto).setScale(0, RoundingMode.DOWN));
+                        } else{
+                            sobra = sobra.add(pe.getSobra().multiply(pe.getValorCusto()));
+                        }  
+                        
                     }
                     
-                    
                 }
-                
-                System.out.println("SOBRA BAR: "+sobra.toString());
                 
                 for(ProdutoEvento pe : produtosBarraca){
                     
@@ -125,14 +136,6 @@ public class FechamentoView extends javax.swing.JDialog {
                     }
                     
                 }
-                
-                System.out.println("SOBRA BARRACA: "+sobra.toString());
-                
-//                estoque = produtoEventoDAO.listarTodosPorEvento(evento, 0);
-//                
-//                for(ProdutoEvento pe : estoque){
-//                    pe.getSobra();
-//                }
 
                 //Despesas
                 despesas = despesaDAO.listarTodosPorEvento(evento);
@@ -215,7 +218,7 @@ public class FechamentoView extends javax.swing.JDialog {
                 JOptionPane.showMessageDialog(this, "Por favor verifique o cadastro de estoque dos produtos "
                         + "antes de realizar o lançamento das vendas.", "Estoque Zerado", JOptionPane.ERROR_MESSAGE);
             }
-
+            
         }
 
     }
@@ -284,10 +287,10 @@ public class FechamentoView extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         textFieldPatrocinio = new javax.swing.JTextField();
         jLabel22 = new javax.swing.JLabel();
-        textFieldVendaComida = new javax.swing.JTextField();
         jLabel23 = new javax.swing.JLabel();
         labelTotalDespesas = new javax.swing.JLabel();
         labelRepasseProducao = new javax.swing.JLabel();
+        textFieldVendaComida = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Detalhes do Evento");
@@ -674,12 +677,6 @@ public class FechamentoView extends javax.swing.JDialog {
 
         jLabel22.setText("Total Venda Comida:");
 
-        textFieldVendaComida.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                textFieldVendaComidaFocusLost(evt);
-            }
-        });
-
         jLabel23.setText("Valor Total:");
 
         labelTotalDespesas.setText("0");
@@ -715,7 +712,7 @@ public class FechamentoView extends javax.swing.JDialog {
                                                     .addComponent(jLabel14)
                                                     .addComponent(jLabel4)
                                                     .addComponent(jLabel22))
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGap(7, 7, 7)
                                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                                     .addComponent(textFieldPatrocinio, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
                                                     .addComponent(textFieldBarracaChurros)
@@ -1094,10 +1091,6 @@ public class FechamentoView extends javax.swing.JDialog {
     private void textFieldPatrocinioFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldPatrocinioFocusLost
         calculaTotalBrutoBar();
     }//GEN-LAST:event_textFieldPatrocinioFocusLost
-
-    private void textFieldVendaComidaFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldVendaComidaFocusLost
-        calculaTotalBrutoBar();
-    }//GEN-LAST:event_textFieldVendaComidaFocusLost
 
     private void salvarDespesa() {
         //SALVA PRODUTO
