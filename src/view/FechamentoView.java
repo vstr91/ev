@@ -10,16 +10,15 @@ import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.text.MaskFormatter;
 import model.BarracaEvento;
 import model.BarracaTableModel;
 import model.CaixaEvento;
@@ -35,14 +34,20 @@ import model.dao.CaixaEventoDAO;
 import model.dao.DespesaDAO;
 import model.dao.ProdutoCamarimDAO;
 import model.dao.ProdutoEventoDAO;
+import org.apache.logging.log4j.Level;
 import org.joda.time.format.DateTimeFormat;
 import utils.FormatUtils;
-import utils.JNumberFormatField;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import utils.ABMTextField;
+import utils.MessageUtils;
 
 /**
  *
  */
 public class FechamentoView extends javax.swing.JDialog {
+    
+    private static final Logger logger = LogManager.getLogger(FechamentoView.class);
 
     JDialog parent;
     private Evento evento;
@@ -73,6 +78,7 @@ public class FechamentoView extends javax.swing.JDialog {
     List<ProdutoEvento> produtosBarraca;
     
     BigDecimal sobra;
+    boolean mostrandoAlerta = false;
 
     public Evento getEvento() {
         return evento;
@@ -157,7 +163,10 @@ public class FechamentoView extends javax.swing.JDialog {
                 });
 
             } catch (SQLException ex) {
-                Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+                MessageUtils.exibeMensagem(this, "Erro de Banco de Dados", 
+                        "Ocorreu erro ao consultar o banco de dados. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
             }
 
             // vendas bares
@@ -214,10 +223,10 @@ public class FechamentoView extends javax.swing.JDialog {
             calculaTotalBrutoBar();
             recarregarTotalDespesas();
             
-            if(!verificarEstoque()){
-                JOptionPane.showMessageDialog(this, "Por favor verifique o cadastro de estoque dos produtos "
-                        + "antes de realizar o lançamento das vendas.", "Estoque Zerado", JOptionPane.ERROR_MESSAGE);
-            }
+//            if(!verificarEstoque()){
+//                JOptionPane.showMessageDialog(this, "Por favor verifique o cadastro de estoque dos produtos "
+//                        + "antes de realizar o lançamento das vendas.", "Estoque Zerado", JOptionPane.ERROR_MESSAGE);
+//            }
             
         }
 
@@ -263,10 +272,10 @@ public class FechamentoView extends javax.swing.JDialog {
         jLabel19 = new javax.swing.JLabel();
         jLabel20 = new javax.swing.JLabel();
         jLabel21 = new javax.swing.JLabel();
-        textFieldValorUnitario = new javax.swing.JTextField();
+        textFieldValorUnitario = new ABMTextField(new DecimalFormat("#,##0.00"));
         labelValorTotal = new javax.swing.JLabel();
         labelFaltaPagar = new javax.swing.JLabel();
-        textFieldValorPago = new javax.swing.JTextField();
+        textFieldValorPago = new ABMTextField(new DecimalFormat("#,##0.00"));
         textFieldObservacao = new javax.swing.JTextField();
         btnDespesa = new javax.swing.JButton();
         spinnerQuantidade = new javax.swing.JSpinner();
@@ -274,7 +283,7 @@ public class FechamentoView extends javax.swing.JDialog {
         jScrollPane4 = new javax.swing.JScrollPane();
         tableConsumoCamarim = new javax.swing.JTable();
         jLabel14 = new javax.swing.JLabel();
-        textFieldBarracaChurros = new javax.swing.JTextField();
+        textFieldBarracaChurros = new ABMTextField(new DecimalFormat("#,##0.00"));
         jPanel3 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         labelRepasseFinal = new javax.swing.JLabel();
@@ -285,12 +294,12 @@ public class FechamentoView extends javax.swing.JDialog {
         btnAdicionarBarraca = new javax.swing.JButton();
         btnAdicionarCaixa = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
-        textFieldPatrocinio = new javax.swing.JTextField();
+        textFieldPatrocinio = new ABMTextField(new DecimalFormat("#,##0.00"));
         jLabel22 = new javax.swing.JLabel();
         jLabel23 = new javax.swing.JLabel();
         labelTotalDespesas = new javax.swing.JLabel();
         labelRepasseProducao = new javax.swing.JLabel();
-        textFieldVendaComida = new javax.swing.JTextField();
+        textFieldVendaComida = new ABMTextField(new DecimalFormat("#,##0.00"));
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Detalhes do Evento");
@@ -868,15 +877,18 @@ public class FechamentoView extends javax.swing.JDialog {
         try {
             spinnerQuantidade.commitEdit();
         } catch (ParseException ex) {
-            Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+            MessageUtils.exibeMensagem(this, "Erro de Interpretação", 
+                        "Ocorreu erro ao interpretar e converter os dados inseridos. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
         }
 
         if (textFieldNomeDespesa.getText().trim().isEmpty() || textFieldValorUnitario.getText().trim().isEmpty()
                 || textFieldValorPago.getText().trim().isEmpty() || (Integer) spinnerQuantidade.getValue() < 1) {
-            JOptionPane.showMessageDialog(this, "Por Favor insira todos os dados.", "Dados não Informados", JOptionPane.ERROR_MESSAGE);
+            MessageUtils.exibeMensagem(this, "Dados não Informados", "Por Favor insira todos os dados.", JOptionPane.ERROR_MESSAGE);
         } else {
             salvarDespesa();
-            JOptionPane.showMessageDialog(this, "Despesa cadastrada com sucesso!", "Despesa Cadastrada", JOptionPane.INFORMATION_MESSAGE);
+            MessageUtils.exibeMensagem(this, "Despesa Cadastrada", "Despesa cadastrada com sucesso!", JOptionPane.INFORMATION_MESSAGE);
             textFieldNomeDespesa.setText("");
             textFieldValorUnitario.setText("");
             textFieldValorPago.setText("");
@@ -942,7 +954,10 @@ public class FechamentoView extends javax.swing.JDialog {
             try {
                 spinnerQuantidade.commitEdit();
             } catch (ParseException ex) {
-                Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+                MessageUtils.exibeMensagem(this, "Erro de Interpretação", 
+                        "Ocorreu erro ao interpretar e converter os dados inseridos. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
             }
 
             textFieldValorUnitario.setText(FormatUtils.formataDinheiroExibicao(d.getValorUnitario()));
@@ -1037,7 +1052,9 @@ public class FechamentoView extends javax.swing.JDialog {
     }//GEN-LAST:event_btnProdutosBarracaActionPerformed
 
     private void textFieldBarracaChurrosFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldBarracaChurrosFocusLost
-        calculaTotalBrutoBar();
+        if(!mostrandoAlerta){
+            calculaTotalBrutoBar();
+        }
     }//GEN-LAST:event_textFieldBarracaChurrosFocusLost
 
     private void textFieldBarracaChurrosKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldBarracaChurrosKeyTyped
@@ -1061,7 +1078,10 @@ public class FechamentoView extends javax.swing.JDialog {
         try {
             barracaEventoDAO.salvar(barracaEvento);
         } catch (SQLException ex) {
-            Logger.getLogger(NovoEventoView.class.getName()).log(Level.SEVERE, null, ex);
+            MessageUtils.exibeMensagem(this, "Erro de Banco de Dados", 
+                        "Ocorreu erro ao persistir os dados inseridos. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
         }
         
         recarregarTabelaBarraca(false);
@@ -1081,7 +1101,10 @@ public class FechamentoView extends javax.swing.JDialog {
         try {
             caixaEventoDAO.salvar(caixaEvento);
         } catch (SQLException ex) {
-            Logger.getLogger(NovoEventoView.class.getName()).log(Level.SEVERE, null, ex);
+            MessageUtils.exibeMensagem(this, "Erro de Banco de Dados", 
+                        "Ocorreu erro ao persistir os dados inseridos. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
         }
         
         recarregarTabelaCaixa(false);
@@ -1089,7 +1112,9 @@ public class FechamentoView extends javax.swing.JDialog {
     }//GEN-LAST:event_btnAdicionarCaixaActionPerformed
 
     private void textFieldPatrocinioFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldPatrocinioFocusLost
-        calculaTotalBrutoBar();
+        if(!mostrandoAlerta){
+            calculaTotalBrutoBar();
+        }
     }//GEN-LAST:event_textFieldPatrocinioFocusLost
 
     private void salvarDespesa() {
@@ -1111,7 +1136,10 @@ public class FechamentoView extends javax.swing.JDialog {
             try {
                 despesaDAO.editar(despesa);
             } catch (SQLException ex) {
-                Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+                MessageUtils.exibeMensagem(this, "Erro de Banco de Dados", 
+                        "Ocorreu erro ao persistir os dados inseridos. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
             } finally {
 //                flagEdicao = false;
                 idDespesa = null;
@@ -1120,7 +1148,10 @@ public class FechamentoView extends javax.swing.JDialog {
             try {
                 despesaDAO.salvar(despesa);
             } catch (SQLException ex) {
-                Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+                MessageUtils.exibeMensagem(this, "Erro de Banco de Dados", 
+                        "Ocorreu erro ao persistir os dados inseridos. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
             }
         }
         
@@ -1132,7 +1163,10 @@ public class FechamentoView extends javax.swing.JDialog {
         try {
             despesas = despesaDAO.listarTodosPorEvento(evento);
         } catch (SQLException ex) {
-            Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+            MessageUtils.exibeMensagem(this, "Erro de Banco de Dados", 
+                        "Ocorreu erro ao tentar carregar os dados necessários. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
         }
 
         tableModelDespesa = new DespesaTableModel(despesas);
@@ -1141,23 +1175,34 @@ public class FechamentoView extends javax.swing.JDialog {
 
     private void calculaTotalBrutoBar() {
 
-        BigDecimal totalBruto = totalVendaCaixas.add(totalVendaBarracas);
+        try{
+            BigDecimal totalBruto = totalVendaCaixas.add(totalVendaBarracas);
+            String textBarracaChurros = textFieldBarracaChurros.getText().trim();
+            String textVendaComida = textFieldVendaComida.getText().trim();
+            String textPatrocinio = textFieldPatrocinio.getText().trim();
 
-        if (!textFieldBarracaChurros.getText().trim().isEmpty()) {
-            totalBruto = totalBruto.add(new BigDecimal(textFieldBarracaChurros.getText().trim()));
-        }
-        
-        if (!textFieldVendaComida.getText().trim().isEmpty()) {
-            totalBruto = totalBruto.add(new BigDecimal(textFieldVendaComida.getText().trim()));
-        }
-        
-        if (!textFieldPatrocinio.getText().trim().isEmpty()) {
-            totalBruto = totalBruto.add(new BigDecimal(textFieldPatrocinio.getText().trim()));
-        }
+            if (!textBarracaChurros.isEmpty() && !textBarracaChurros.equals("0,00")) {
+                totalBruto = totalBruto.add(new BigDecimal(FormatUtils.ajustaFormato(textBarracaChurros)));
+            }
 
-        labelTotalBrutoBar.setText(FormatUtils.formataDinheiroExibicao(totalBruto));
+            if (!textVendaComida.isEmpty() && !textVendaComida.equals("0,00")) {
+                totalBruto = totalBruto.add(new BigDecimal(FormatUtils.ajustaFormato(textVendaComida)));
+            }
+
+            if (!textPatrocinio.isEmpty() && !textPatrocinio.equals("0,00")) {
+                totalBruto = totalBruto.add(new BigDecimal(FormatUtils.ajustaFormato(textPatrocinio)));
+            }
+
+            labelTotalBrutoBar.setText(FormatUtils.formataDinheiroExibicao(totalBruto));
+
+            recarregarTotalDespesas();
+        } catch(NumberFormatException e){
+            mostrandoAlerta = true;
+             MessageUtils.exibeMensagem(this, "Valor Inválido", "O número digitado é inválido! Por favor verifique.", JOptionPane.ERROR_MESSAGE);
+            logger.error(Level.ERROR, e);
+            mostrandoAlerta = false;
+        }
         
-        recarregarTotalDespesas();
 
     }
     
@@ -1166,7 +1211,10 @@ public class FechamentoView extends javax.swing.JDialog {
             //Barracas
             caixas = caixaEventoDAO.listarTodosPorEvento(evento);
         } catch (SQLException ex) {
-            Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+            MessageUtils.exibeMensagem(this, "Erro de Banco de Dados", 
+                        "Ocorreu erro ao tentar carregar os dados necessários. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
         }
                 tableModelCaixa = new CaixaTableModel(caixas);
                 tableVendasBar.setModel(tableModelCaixa);
@@ -1182,7 +1230,10 @@ public class FechamentoView extends javax.swing.JDialog {
             //Barracas
             barracas = barracaEventoDAO.listarTodosPorEvento(evento);
         } catch (SQLException ex) {
-            Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+            MessageUtils.exibeMensagem(this, "Erro de Banco de Dados", 
+                        "Ocorreu erro ao tentar carregar os dados necessários. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
         }
                 tableModelBarraca = new BarracaTableModel(barracas);
                 tableVendasBarracas.setModel(tableModelBarraca);
@@ -1198,13 +1249,16 @@ public class FechamentoView extends javax.swing.JDialog {
             //Barracas
             despesas = despesaDAO.listarTodosPorEvento(evento);
         } catch (SQLException ex) {
-            Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+            MessageUtils.exibeMensagem(this, "Erro de Banco de Dados", 
+                        "Ocorreu erro ao tentar carregar os dados necessários. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
         }
         
         tableModelDespesa = new DespesaTableModel(despesas);
         tableDespesas.setModel(tableModelDespesa);
         
-        System.out.println("Despesas B: "+tableModelDespesa.getValorTotalDespesas()+" | Despesas A: "+sobra);
+        //System.out.println("Despesas B: "+tableModelDespesa.getValorTotalDespesas()+" | Despesas A: "+sobra);
         
         labelTotalDespesas.setText(FormatUtils.formataDinheiroExibicao(tableModelDespesa.getValorTotalDespesas()));
         labelDespesas.setText(FormatUtils.formataDinheiroExibicao(tableModelDespesa.getValorTotalDespesas().add(sobra)));
@@ -1223,8 +1277,10 @@ public class FechamentoView extends javax.swing.JDialog {
             totalDespesas = new BigDecimal(FormatUtils.ajustaFormato(labelDespesas.getText()));
             totalLiquido = totalBruto.subtract(totalDespesas);
         } catch(NumberFormatException e){
-            e.printStackTrace();
-            System.out.println("DESP: "+labelDespesas.getText());
+            MessageUtils.exibeMensagem(this, "Erro de Formatação", 
+                        "Ocorreu erro ao tentar formatar os dados inseridos. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, e);
         }
         
         labelTotalLiquido.setText(FormatUtils.formataDinheiroExibicao(totalLiquido));
@@ -1253,7 +1309,10 @@ public class FechamentoView extends javax.swing.JDialog {
             }
             
         } catch (SQLException ex) {
-            Logger.getLogger(FechamentoView.class.getName()).log(Level.SEVERE, null, ex);
+            MessageUtils.exibeMensagem(this, "Erro de Banco de Dados", 
+                        "Ocorreu erro ao tentar carregar os dados necessários. Consulte o log para detalhes.", 
+                        JOptionPane.ERROR_MESSAGE);
+                logger.error(Level.FATAL, ex);
         }
         
         return estoque.intValue() > 0;

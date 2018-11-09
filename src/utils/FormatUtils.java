@@ -16,10 +16,19 @@ import java.text.NumberFormat;
 public class FormatUtils {
     
     public static String formataDinheiroExibicao(BigDecimal valor){
+        
         NumberFormat f = NumberFormat.getCurrencyInstance();
         f.setMaximumFractionDigits(2);
         f.setMinimumFractionDigits(0);
-        return f.format(valor);
+        
+        if(valor != null){
+            return f.format(valor);
+        } else{
+            return f.format(BigDecimal.ZERO);
+        }
+        
+        
+        
     }
     
     public static String ajustaFormato(String valor){
@@ -34,7 +43,13 @@ public class FormatUtils {
         NumberFormat f = NumberFormat.getNumberInstance();
         f.setMaximumFractionDigits(2);
         f.setMinimumFractionDigits(0);
-        return f.format(valor);
+        
+        if(valor != null){
+            return f.format(valor);
+        } else{
+            return f.format(BigDecimal.ZERO);
+        }
+        
     }
 
 }

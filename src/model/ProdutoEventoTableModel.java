@@ -114,6 +114,7 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
         
         fireTableCellUpdated(rowIndex, columnIndex);
         fireTableCellUpdated(rowIndex, 5);
+        fireTableCellUpdated(rowIndex, 6);
     }
 
     public Object getValueAt(int rowIndex, int columnIndex) {

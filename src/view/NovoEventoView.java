@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.text.MaskFormatter;
 import model.BarracaEvento;
 import model.CaixaEvento;
 import model.Evento;
@@ -58,6 +59,12 @@ public class NovoEventoView extends javax.swing.JDialog {
         btnCadastrar = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
         textFieldData = new javax.swing.JTextField();
+        try{
+            javax.swing.text.MaskFormatter data= new javax.swing.text.MaskFormatter("##/##/####");
+            textFieldData = new javax.swing.JFormattedTextField(data);
+        }
+        catch (Exception e){
+        }
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Novo Evento");
@@ -83,7 +90,7 @@ public class NovoEventoView extends javax.swing.JDialog {
             }
         });
 
-        jLabel5.setText("Data");
+        jLabel5.setText("Data (dd/mm/yyyy)");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
