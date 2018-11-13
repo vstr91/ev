@@ -1,0 +1,15 @@
+2018-11-13 11:42:17 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "EVENTO" not found; SQL statement:
+SELECT * FROM evento [42102-197]
+2018-11-13 11:45:08 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "EVENTO" not found; SQL statement:
+SELECT * FROM evento [42102-197]
+2018-11-13 11:45:33 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "EVENTO" not found; SQL statement:
+INSERT INTO evento (nome, data, observacao) VALUES (?, ?, ?) [42102-197]
+2018-11-13 11:51:16 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "EVENTO" not found; SQL statement:
+SELECT * FROM evento [42102-197]
+2018-11-13 11:52:21 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "EVENTO" not found; SQL statement:
+SELECT * FROM evento [42102-197]

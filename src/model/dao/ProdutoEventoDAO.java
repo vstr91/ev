@@ -90,21 +90,19 @@ public class ProdutoEventoDAO {
             query = "SELECT p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque, pe.estoque - COALESCE(SUM(pc.QUANTIDADE),0) as sobra, "
                     + "SUM(pc.QUANTIDADE) " +
             "FROM produto p LEFT JOIN " +
-            "     produto_evento pe ON p.ID = pe.PRODUTO LEFT JOIN " +
+            "     produto_evento pe ON p.ID = pe.PRODUTO AND (pe.evento = ? OR pe.evento IS NULL) LEFT JOIN " +
             "     PRODUTO_CAIXA pc ON pc.PRODUTO_EVENTO = pe.ID LEFT JOIN " +
             "     CAIXA_EVENTO c ON c.id = pc.CAIXA " +
-            "WHERE (pe.evento = ? OR pe.evento IS NULL)" +
-            "AND   p.TIPO = ? " +
+            "WHERE p.TIPO = ? " +
             "GROUP BY p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque";
         } else{
             query = "SELECT p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque, pe.estoque - COALESCE(SUM(pc.QUANTIDADE),0) as sobra, "
                     + "SUM(pc.QUANTIDADE) " +
             "FROM produto p LEFT JOIN " +
-            "     produto_evento pe ON p.ID = pe.PRODUTO LEFT JOIN " +
+            "     produto_evento pe ON p.ID = pe.PRODUTO AND (pe.evento = ? OR pe.evento IS NULL) LEFT JOIN " +
             "     PRODUTO_BARRACA pc ON pc.PRODUTO_EVENTO = pe.ID LEFT JOIN " +
             "     BARRACA_EVENTO c ON c.id = pc.BARRACA " +
-            "WHERE (pe.evento = ? OR pe.evento IS NULL) " +
-            "AND   p.TIPO = ? " +
+            "WHERE p.TIPO = ? " +
             "GROUP BY p.id, -1, valor_custo, valor_venda, pe.id, pe.estoque";
         }
 

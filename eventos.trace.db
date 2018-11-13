@@ -1,0 +1,21 @@
+2018-11-13 12:06:19 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "EVENTO" not found; SQL statement:
+SELECT * FROM evento [42102-197]
+2018-11-13 12:08:34 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT UNIDADE_VENDA[*] ('nome') VALUES ('Unidade')"; expected "INTO"; SQL statement:
+INSERT UNIDADE_VENDA ('nome') VALUES ('Unidade') [42001-196]
+2018-11-13 12:08:34 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT UNIDADE_VENDA[*] ('nome') VALUES ('Dose')"; expected "INTO"; SQL statement:
+INSERT UNIDADE_VENDA ('nome') VALUES ('Dose') [42001-196]
+2018-11-13 12:08:34 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT UNIDADE_VENDA[*] ('nome') VALUES ('Lata')"; expected "INTO"; SQL statement:
+INSERT UNIDADE_VENDA ('nome') VALUES ('Lata') [42001-196]
+2018-11-13 12:08:50 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO UNIDADE_VENDA ('nome'[*]) VALUES ('Unidade')"; expected "identifier"; SQL statement:
+INSERT INTO UNIDADE_VENDA ('nome') VALUES ('Unidade') [42001-196]
+2018-11-13 12:08:50 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO UNIDADE_VENDA ('nome'[*]) VALUES ('Dose')"; expected "identifier"; SQL statement:
+INSERT INTO UNIDADE_VENDA ('nome') VALUES ('Dose') [42001-196]
+2018-11-13 12:08:50 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO UNIDADE_VENDA ('nome'[*]) VALUES ('Lata')"; expected "identifier"; SQL statement:
+INSERT INTO UNIDADE_VENDA ('nome') VALUES ('Lata') [42001-196]

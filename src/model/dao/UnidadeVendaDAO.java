@@ -55,6 +55,61 @@ public class UnidadeVendaDAO {
         
     }
     
+    public int salvar(UnidadeVenda unidadeVenda) throws SQLException {
+
+        String query = "INSERT INTO unidade_venda (nome) VALUES (?)";
+        PreparedStatement ps = null;
+        Integer id = -1;
+
+        try (Connection con = new ConnectionFactory().getConnection()) {
+            
+            ps = con.prepareStatement(query);
+            ps.setString(1, unidadeVenda.getNome());
+            ps.executeUpdate();
+            
+            ResultSet rs = ps.getGeneratedKeys();
+            rs.next();
+            id = rs.getInt(1);
+            
+            ps.close();
+            
+        } catch (SQLException e) {
+            System.out.println(e);
+            
+            if(ps != null){
+                ps.close();
+            }
+            
+        }
+        
+        return id;
+        
+    }
+    
+    public void editar(UnidadeVenda unidadeVenda) throws SQLException {
+
+        String query = "UPDATE unidade_venda SET nome = ? WHERE id = ?";
+        PreparedStatement ps = null;
+
+        try (Connection con = new ConnectionFactory().getConnection()) {
+            
+            ps = con.prepareStatement(query);
+            ps.setString(1, unidadeVenda.getNome());
+            ps.setInt(2, unidadeVenda.getId());
+            ps.execute();
+            ps.close();
+            
+        } catch (SQLException e) {
+            System.out.println(e);
+            
+            if(ps != null){
+                ps.close();
+            }
+            
+        }
+        
+    }
+    
     public UnidadeVenda carregar(int id) throws SQLException {
 
         String query = "SELECT * FROM unidade_venda WHERE id = ?";

@@ -118,7 +118,7 @@ public class FechamentoView extends javax.swing.JDialog {
                 
                 for(ProdutoEvento pe : produtosBar){
                     
-                    if(pe.getSobra() != null && pe.getValorCusto() != null){
+                    if(pe.getSobra() != null && pe.getValorCusto() != null && pe.getVendas() != null){
                         
                         if(pe.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")){
                             BigDecimal valorCusto = pe.getValorCusto();
