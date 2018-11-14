@@ -12,12 +12,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import model.Evento;
-import model.Produto;
-import model.UnidadeVenda;
-import org.joda.time.DateTime;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.format.DateTimeFormat;
 
 /**
@@ -25,8 +24,10 @@ import org.joda.time.format.DateTimeFormat;
  */
 public class EventoDAO {
 
+    Logger logger;
+    
     public EventoDAO() {
-
+        logger = LogManager.getLogger(EventoDAO.class);
     }
     
     public List<Evento> listarTodos() throws SQLException {
@@ -47,6 +48,9 @@ public class EventoDAO {
                 evento.setData(DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss")
                         .parseDateTime(rs.getString(3)));
                 evento.setObservacao(rs.getString(4));
+                evento.setVendaChurros(rs.getBigDecimal(5));
+                evento.setPatrocinio(rs.getBigDecimal(6));
+                evento.setVendaComida(rs.getBigDecimal(7));
                 eventos.add(evento);
             }
             
@@ -126,6 +130,32 @@ public class EventoDAO {
         
     }
     
+    public void editarValores(Evento evento) throws SQLException {
+
+        String query = "UPDATE evento SET barraca_churros = ?, patrocinio = ?, venda_comida = ? WHERE id = ?";
+        PreparedStatement ps = null;
+
+        try (Connection con = new ConnectionFactory().getConnection()) {
+            
+            ps = con.prepareStatement(query);
+            ps.setBigDecimal(1, evento.getVendaChurros());
+            ps.setBigDecimal(2, evento.getPatrocinio());
+            ps.setBigDecimal(3, evento.getVendaComida());
+            ps.setInt(4, evento.getId());
+            ps.execute();
+            ps.close();
+            
+        } catch (SQLException e) {
+            logger.error(Level.FATAL, e);
+            
+            if(ps != null){
+                ps.close();
+            }
+            
+        }
+        
+    }
+    
     public Evento carregar(Evento umEvento) throws SQLException {
 
         String query = "SELECT * FROM evento WHERE id = ?";
@@ -145,6 +175,9 @@ public class EventoDAO {
                 evento.setData(DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss")
                         .parseDateTime(rs.getString(3)));
                 evento.setObservacao(rs.getString(4));
+                evento.setVendaChurros(rs.getBigDecimal(5));
+                evento.setPatrocinio(rs.getBigDecimal(6));
+                evento.setVendaComida(rs.getBigDecimal(7));
             }
             
             ps.close();

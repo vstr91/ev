@@ -80,7 +80,7 @@ public class ProdutoCaixaTableModel extends AbstractTableModel {
             vendas = produto.getProduto().getVendas().intValue();
         }
         
-        
+        String val = FormatUtils.ajustaFormato((String) aValue);
 
         switch (columnIndex) {
 //            case 0:
@@ -90,7 +90,14 @@ public class ProdutoCaixaTableModel extends AbstractTableModel {
 //            case 1:
 //                produto.setProduto((Produto) aValue);
             case 2:
-                quantidade = Integer.valueOf((String) aValue);
+                
+                if (val.matches("[0-9.,]+")) {
+                    quantidade = Integer.valueOf((String) aValue);
+                } else{
+                    quantidade = 0;
+                }
+                
+                
                 
                 //if((estoque - vendas) >= quantidade){
                     produto.setQuantidade(quantidade);

@@ -75,29 +75,59 @@ public class ProdutoCamarimTableModel extends AbstractTableModel {
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         ProdutoCamarim produto = produtos.get(rowIndex);
 
-        switch (columnIndex) {
-//            case 0:
-//                produto.setId((Integer) aValue);
-//            case 0:
-//                produto.setEvento((Evento) aValue);
-//            case 1:
-//                produto.setProduto((Produto) aValue);
-            case 2:
-                produto.setAvaria(Integer.valueOf((String) aValue));
-                break;
-            case 3:
-                produto.setProducao(Integer.valueOf((String) aValue));
-                break;
-            case 4:
-                produto.setSocios(Integer.valueOf((String) aValue));
-                break;
-            case 5:
-                produto.setCacau(Integer.valueOf((String) aValue));
-                break;
-            default:
-                System.err.println("Índice da coluna inválido");
-                break;
+        String val = (String) aValue;
+        
+        if(val.matches("[0-9.,]+")){
+            switch (columnIndex) {
+    //            case 0:
+    //                produto.setId((Integer) aValue);
+    //            case 0:
+    //                produto.setEvento((Evento) aValue);
+    //            case 1:
+    //                produto.setProduto((Produto) aValue);
+                case 2:
+                    produto.setAvaria(Integer.valueOf((String) aValue));
+                    break;
+                case 3:
+                    produto.setProducao(Integer.valueOf((String) aValue));
+                    break;
+                case 4:
+                    produto.setSocios(Integer.valueOf((String) aValue));
+                    break;
+                case 5:
+                    produto.setCacau(Integer.valueOf((String) aValue));
+                    break;
+                default:
+                    System.err.println("Índice da coluna inválido");
+                    break;
+            }
+        } else{
+            switch (columnIndex) {
+    //            case 0:
+    //                produto.setId((Integer) aValue);
+    //            case 0:
+    //                produto.setEvento((Evento) aValue);
+    //            case 1:
+    //                produto.setProduto((Produto) aValue);
+                case 2:
+                    produto.setAvaria(0);
+                    break;
+                case 3:
+                    produto.setProducao(0);
+                    break;
+                case 4:
+                    produto.setSocios(0);
+                    break;
+                case 5:
+                    produto.setCacau(0);
+                    break;
+                default:
+                    System.err.println("Índice da coluna inválido");
+                    break;
+            }
         }
+        
+        
         
         try {
             produtoCamarimDAO.editar(produto);

@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import model.Combo;
 import model.UnidadeVenda;
 import model.UnidadeVendaTableModel;
@@ -54,6 +55,7 @@ public class UnidadeVendaView extends javax.swing.JDialog {
         btnCadastrar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Gerenciar Unidades de Venda");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -138,8 +140,6 @@ public class UnidadeVendaView extends javax.swing.JDialog {
     private void tableUnidadesVendaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableUnidadesVendaMouseClicked
         if (evt.getClickCount() >= 2) {
             
-            dispose();
-            
             int linha = tableUnidadesVenda.getSelectedRow();
 
             UnidadeVenda u = unidades.get(linha);
@@ -155,28 +155,56 @@ public class UnidadeVendaView extends javax.swing.JDialog {
     }//GEN-LAST:event_tableUnidadesVendaMouseClicked
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
-        
+        if(textFieldNome.getText().trim().isEmpty()){
+            JOptionPane.showMessageDialog(this, "Por Favor digite o nome da unidade de venda", "Dados não Informados", JOptionPane.ERROR_MESSAGE);
+        } else{
+            salvar();
+            JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso!", "Produto Cadastrado", JOptionPane.INFORMATION_MESSAGE);
+            textFieldNome.setText("");
+
+            if (flagEdicao) {
+                flagEdicao = false;
+            }
+        }
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
     private void salvar() {
-        //SALVA COMBO
+        //SALVA UNIDADE
         unidadeVenda = new UnidadeVenda();
         unidadeVenda.setNome(textFieldNome.getText().trim());
 
         if (unidadeVendaDAO == null) {
             unidadeVendaDAO = new UnidadeVendaDAO();
         }
-
-        try {
-            idGerado = unidadeVendaDAO.salvar(unidadeVenda);
-        } catch (SQLException ex) {
-            Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+        
+        if (flagEdicao && idUnidade != null) {
+            unidadeVenda.setId(idUnidade);
+            try {
+                unidadeVendaDAO.editar(unidadeVenda);
+            } catch (SQLException ex) {
+                Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+//                flagEdicao = false;
+                idUnidade = null;
+                btnCadastrar.setText("Cadastrar");
+            }
+        } else {
+            try {
+                unidadeVendaDAO.salvar(unidadeVenda);
+            } catch (SQLException ex) {
+                Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+
+//        try {
+//            idGerado = unidadeVendaDAO.salvar(unidadeVenda);
+//        } catch (SQLException ex) {
+//            Logger.getLogger(ProdutoView.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         
         textFieldNome.setText("");
         
         carregarRegistrosTabela();
-        btnCadastrar.setText("Cadastrar");
 
     }
     

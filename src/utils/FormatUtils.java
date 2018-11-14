@@ -39,6 +39,17 @@ public class FormatUtils {
         return valor.trim();
     }
     
+    public static String ajustaFormato(BigDecimal val){
+        
+        String valor = formataDinheiroExibicao(val);
+        
+        valor = valor.replace(".", "");
+        valor = valor.replace(",", ".");
+        valor = valor.replace(NumberFormat.getCurrencyInstance().getCurrency().getSymbol(), "");
+        valor = valor.replace("- ", "-");
+        return valor.trim();
+    }
+    
     public static String formataDecimalExibicao(BigDecimal valor){
         NumberFormat f = NumberFormat.getNumberInstance();
         f.setMaximumFractionDigits(2);

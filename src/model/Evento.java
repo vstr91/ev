@@ -6,6 +6,7 @@
 
 package model;
 
+import java.math.BigDecimal;
 import org.joda.time.DateTime;
 
 /**
@@ -17,6 +18,10 @@ public class Evento {
     private String nome;
     private DateTime data;
     private String observacao;
+    
+    private BigDecimal vendaChurros;
+    private BigDecimal patrocinio;
+    private BigDecimal vendaComida;
 
     public int getId() {
         return id;
@@ -48,6 +53,30 @@ public class Evento {
 
     public void setObservacao(String observacao) {
         this.observacao = observacao;
+    }
+
+    public BigDecimal getVendaChurros() {
+        return vendaChurros;
+    }
+
+    public void setVendaChurros(BigDecimal vendaChurros) {
+        this.vendaChurros = vendaChurros;
+    }
+
+    public BigDecimal getPatrocinio() {
+        return patrocinio;
+    }
+
+    public void setPatrocinio(BigDecimal patrocinio) {
+        this.patrocinio = patrocinio;
+    }
+
+    public BigDecimal getVendaComida() {
+        return vendaComida;
+    }
+
+    public void setVendaComida(BigDecimal vendaComida) {
+        this.vendaComida = vendaComida;
     }
     
 }

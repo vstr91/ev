@@ -70,6 +70,7 @@ public class ComboCaixaTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         ComboCaixa produto = produtos.get(rowIndex);
+        int quantidade = 0;
 
         switch (columnIndex) {
 //            case 0:
@@ -79,7 +80,16 @@ public class ComboCaixaTableModel extends AbstractTableModel {
 //            case 1:
 //                produto.setProduto((Produto) aValue);
             case 2:
-                produto.setQuantidade(Integer.valueOf((String) aValue));
+                
+                String val = FormatUtils.ajustaFormato((String) aValue);
+                
+                if (val.matches("[0-9.,]+")) {
+                    quantidade = Integer.valueOf((String) aValue);
+                } else{
+                    quantidade = 0;
+                }
+                
+                produto.setQuantidade(quantidade);
                 break;
             default:
                 System.err.println("Índice da coluna inválido");

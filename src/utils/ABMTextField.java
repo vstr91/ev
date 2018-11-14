@@ -28,10 +28,17 @@ public class ABMTextField extends JTextField
     @Override
     public void setText(String text)
     {
-        Number number = format.parse(text, new ParsePosition(0));
+        
+        if(text == null){
+            
+        } else{
+            Number number = format.parse(text, new ParsePosition(0));
 
         if (number != null)
             super.setText( text );
+        }
+        
+        
     }
 
     public class ABMFilter extends DocumentFilter
@@ -45,7 +52,7 @@ public class ABMTextField extends JTextField
         public void replace(FilterBypass fb, int offs, int length, String str, AttributeSet a)
             throws BadLocationException
         {
-            if ("0123456789".contains(str))
+            if (str.matches("[0-9.,]+"))
             {
                 Document doc = fb.getDocument();
                 StringBuilder sb = new StringBuilder( doc.getText(0, doc.getLength()) );
@@ -65,10 +72,13 @@ public class ABMTextField extends JTextField
                     String text = format.format( format.parse( sb.toString() ) );
                     super.replace(fb, 0, doc.getLength(), text, a);
                 }
-                catch(ParseException e) {}
+                catch(ParseException e) {
+                    e.printStackTrace();
+                }
             }
             else
-                Toolkit.getDefaultToolkit().beep();
+//                Toolkit.getDefaultToolkit().beep();
+                System.out.println("Numero inválido");
         }
 
         public void remove(DocumentFilter.FilterBypass fb, int offset, int length)
@@ -92,7 +102,9 @@ public class ABMTextField extends JTextField
                 String text = format.format( format.parse( sb.toString() ) );
                 super.replace(fb, 0, doc.getLength(), text, null);
             }
-            catch(ParseException e) {}
+            catch(ParseException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -101,7 +113,6 @@ public class ABMTextField extends JTextField
         DecimalFormat format = new DecimalFormat("###,##0.00");
 //      DecimalFormat format = new DecimalFormat("0000000000");
         ABMTextField abm = new ABMTextField( format );
-
         JPanel panel = new JPanel();
         panel.add( abm );
 
@@ -113,14 +124,14 @@ public class ABMTextField extends JTextField
         frame.setVisible( true );
     }
 
-    public static void main(String[] args)
-    {
-        EventQueue.invokeLater(new Runnable()
-        {
-            public void run()
-            {
-                createAndShowUI();
-            }
-        });
-    }
+//    public static void main(String[] args)
+//    {
+//        EventQueue.invokeLater(new Runnable()
+//        {
+//            public void run()
+//            {
+//                createAndShowUI();
+//            }
+//        });
+//    }
 }

@@ -38,7 +38,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jPanel1" pref="631" max="32767" attributes="0"/>
+              <Component id="jPanel1" pref="649" max="32767" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -90,9 +90,9 @@
                                                   </Group>
                                                   <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
                                                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                                      <Component id="textFieldPatrocinio" alignment="0" pref="106" max="32767" attributes="0"/>
-                                                      <Component id="textFieldBarracaChurros" alignment="0" max="32767" attributes="0"/>
-                                                      <Component id="textFieldVendaComida" max="32767" attributes="0"/>
+                                                      <Component id="textFieldVendaComida" pref="106" max="32767" attributes="0"/>
+                                                      <Component id="textFieldPatrocinio" max="32767" attributes="0"/>
+                                                      <Component id="textFieldBarracaChurros" max="32767" attributes="0"/>
                                                   </Group>
                                                   <EmptySpace max="-2" attributes="0"/>
                                                   <Group type="103" groupAlignment="0" attributes="0">
@@ -192,7 +192,7 @@
                                       <Component id="jLabel14" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="textFieldBarracaChurros" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="3" attributes="0">
                                       <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="textFieldPatrocinio" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -236,7 +236,7 @@
                               <Component id="labelConsumoCamarim" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jScrollPane4" min="-2" pref="93" max="-2" attributes="0"/>
+                          <Component id="jScrollPane4" min="-2" pref="131" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" attributes="0">
                           <Component id="jScrollPane3" min="-2" pref="186" max="-2" attributes="0"/>
@@ -605,7 +605,7 @@
                 <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="textFieldValorUnitarioFocusLost"/>
               </Events>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ABMTextField(new DecimalFormat(&quot;#,##0.00&quot;));"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JNumberFormatField();"/>
               </AuxValues>
             </Component>
             <Component class="javax.swing.JLabel" name="labelValorTotal">
@@ -623,7 +623,7 @@
                 <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="textFieldValorPagoFocusLost"/>
               </Events>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ABMTextField(new DecimalFormat(&quot;#,##0.00&quot;));"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JNumberFormatField();"/>
               </AuxValues>
             </Component>
             <Component class="javax.swing.JTextField" name="textFieldObservacao">
@@ -724,16 +724,6 @@
             <Property name="text" type="java.lang.String" value="Barraca Churros + Bala + Batata:"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="textFieldBarracaChurros">
-          <Events>
-            <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="textFieldBarracaChurrosFocusLost"/>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="textFieldBarracaChurrosActionPerformed"/>
-            <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="textFieldBarracaChurrosKeyTyped"/>
-          </Events>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ABMTextField(new DecimalFormat(&quot;#,##0.00&quot;));"/>
-          </AuxValues>
-        </Component>
         <Container class="javax.swing.JPanel" name="jPanel3">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
@@ -802,6 +792,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Salvar Informa&#xe7;&#xf5;es"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSalvarActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnProdutos">
           <Properties>
@@ -840,14 +833,6 @@
             <Property name="text" type="java.lang.String" value="Patroc&#xed;nio:"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="textFieldPatrocinio">
-          <Events>
-            <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="textFieldPatrocinioFocusLost"/>
-          </Events>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ABMTextField(new DecimalFormat(&quot;#,##0.00&quot;));"/>
-          </AuxValues>
-        </Component>
         <Component class="javax.swing.JLabel" name="jLabel22">
           <Properties>
             <Property name="text" type="java.lang.String" value="Total Venda Comida:"/>
@@ -868,10 +853,20 @@
             <Property name="text" type="java.lang.String" value="0"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="textFieldVendaComida">
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ABMTextField(new DecimalFormat(&quot;#,##0.00&quot;));"/>
-          </AuxValues>
+        <Component class="utils.JNumberFormatField" name="textFieldVendaComida">
+          <Events>
+            <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="textFieldVendaComidaFocusLost"/>
+          </Events>
+        </Component>
+        <Component class="utils.JNumberFormatField" name="textFieldPatrocinio">
+          <Events>
+            <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="textFieldPatrocinioFocusLost"/>
+          </Events>
+        </Component>
+        <Component class="utils.JNumberFormatField" name="textFieldBarracaChurros">
+          <Events>
+            <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="textFieldBarracaChurrosFocusLost"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

@@ -79,39 +79,70 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         ProdutoEvento produto = produtos.get(rowIndex);
 
-        switch (columnIndex) {
+        String val = FormatUtils.ajustaFormato((String) aValue);
+
+        if (val.matches("[0-9.,]+")) {
+            switch (columnIndex) {
 //            case 0:
 //                produto.setId((Integer) aValue);
 //            case 0:
 //                produto.setEvento((Evento) aValue);
 //            case 1:
 //                produto.setProduto((Produto) aValue);
-            case 1:
-                produto.setValorCusto(BigDecimal.valueOf(Double.parseDouble(FormatUtils.ajustaFormato( (String) aValue))));
-                break;
-            case 2:
-                produto.setValorVenda(BigDecimal.valueOf(Double.parseDouble(FormatUtils.ajustaFormato( (String) aValue))));
-                break;
-            case 3:
-                produto.setEstoque(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
-                break;
-            case 4:
-                produto.setVendas(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
-                break;
-            case 5:
-                produto.setSobra(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
-                break;
-            default:
-                System.err.println("Índice da coluna inválido");
-                break;
+                case 1:
+                    produto.setValorCusto(BigDecimal.valueOf(Double.parseDouble(FormatUtils.ajustaFormato((String) aValue))));
+                    break;
+                case 2:
+                    produto.setValorVenda(BigDecimal.valueOf(Double.parseDouble(FormatUtils.ajustaFormato((String) aValue))));
+                    break;
+                case 3:
+                    produto.setEstoque(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
+                    break;
+                case 4:
+                    produto.setVendas(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
+                    break;
+                case 5:
+                    produto.setSobra(BigDecimal.valueOf(Integer.valueOf((String) aValue)));
+                    break;
+                default:
+                    System.err.println("Índice da coluna inválido");
+                    break;
+            }
+        } else {
+            switch (columnIndex) {
+//            case 0:
+//                produto.setId((Integer) aValue);
+//            case 0:
+//                produto.setEvento((Evento) aValue);
+//            case 1:
+//                produto.setProduto((Produto) aValue);
+                case 1:
+                    produto.setValorCusto(BigDecimal.ZERO);
+                    break;
+                case 2:
+                    produto.setValorVenda(BigDecimal.ZERO);
+                    break;
+                case 3:
+                    produto.setEstoque(BigDecimal.ZERO);
+                    break;
+                case 4:
+                    produto.setVendas(BigDecimal.ZERO);
+                    break;
+                case 5:
+                    produto.setSobra(BigDecimal.ZERO);
+                    break;
+                default:
+                    System.err.println("Índice da coluna inválido");
+                    break;
+            }
         }
-        
+
         try {
             produtoEventoDAO.editar(produto);
         } catch (SQLException ex) {
             Logger.getLogger(ProdutoEventoTableModel.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         fireTableCellUpdated(rowIndex, columnIndex);
         fireTableCellUpdated(rowIndex, 5);
         fireTableCellUpdated(rowIndex, 6);
@@ -128,83 +159,82 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
                 valueObject = produtoSelecionado.getProduto().getNome();
                 break;
             case 1:
-                if(produtoSelecionado.getValorCusto()== null || produtoSelecionado.getValorCusto().equals("null")){
+                if (produtoSelecionado.getValorCusto() == null || produtoSelecionado.getValorCusto().equals("null")) {
                     valueObject = "0";
-                } else{
+                } else {
                     valueObject = FormatUtils.formataDinheiroExibicao(produtoSelecionado.getValorCusto());
                 }
                 break;
             case 2:
-                if(produtoSelecionado.getValorVenda()== null || produtoSelecionado.getValorVenda().equals("null")){
+                if (produtoSelecionado.getValorVenda() == null || produtoSelecionado.getValorVenda().equals("null")) {
                     valueObject = "0";
-                } else{
+                } else {
                     valueObject = FormatUtils.formataDinheiroExibicao(produtoSelecionado.getValorVenda());
                 }
                 break;
             case 3:
-                if(produtoSelecionado.getEstoque()== null || produtoSelecionado.getEstoque().equals("null")){
+                if (produtoSelecionado.getEstoque() == null || produtoSelecionado.getEstoque().equals("null")) {
                     valueObject = "0";
-                } else{
+                } else {
                     valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getEstoque());
                 }
                 break;
             case 4:
-                if(produtoSelecionado.getVendas()== null || produtoSelecionado.getVendas().equals("null")){
+                if (produtoSelecionado.getVendas() == null || produtoSelecionado.getVendas().equals("null")) {
                     valueObject = "0";
-                } else{
-                    
-                    if(produtoSelecionado.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")){
-                        valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getVendas())+" doses / "
-                                +produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()), 2, RoundingMode.HALF_EVEN)+" unidades";
-                    } else{
+                } else {
+
+                    if (produtoSelecionado.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")) {
+                        valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getVendas()) + " doses / "
+                                + produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()), 2, RoundingMode.HALF_EVEN) + " unidades";
+                    } else {
                         valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getVendas());
                     }
-                    
+
                 }
                 break;
             case 5:
-                
-                if(produtoSelecionado.getSobra() == null || produtoSelecionado.getSobra().equals("null")){
+
+                if (produtoSelecionado.getSobra() == null || produtoSelecionado.getSobra().equals("null")) {
                     valueObject = "0";
-                } else{
-                    
-                    if(produtoSelecionado.getVendas() == null){
+                } else {
+
+                    if (produtoSelecionado.getVendas() == null) {
                         produtoSelecionado.setVendas(BigDecimal.ZERO);
                     }
-                    
-                    if(produtoSelecionado.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")){
-                        valueObject = 
-                                FormatUtils.formataDecimalExibicao(produtoSelecionado.getEstoque()
+
+                    if (produtoSelecionado.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")) {
+                        valueObject
+                                = FormatUtils.formataDecimalExibicao(produtoSelecionado.getEstoque()
                                         .subtract(produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()), 2, RoundingMode.HALF_EVEN)
                                         ));
-                    } else{
+                    } else {
                         valueObject = FormatUtils.formataDecimalExibicao(produtoSelecionado.getEstoque().subtract(produtoSelecionado.getVendas()));
                     }
-                    
+
                 }
-                
+
                 break;
             case 6:
-                
-                if(produtoSelecionado.getSobra() == null){
+
+                if (produtoSelecionado.getSobra() == null) {
                     valueObject = "0";
-                } else{
-                    
-                    if(produtoSelecionado.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")){
-                        valueObject = 
-                                FormatUtils.formataDinheiroExibicao(produtoSelecionado.getValorCusto()
+                } else {
+
+                    if (produtoSelecionado.getProduto().getTipoUnidade().getNome().equalsIgnoreCase("dose")) {
+                        valueObject
+                                = FormatUtils.formataDinheiroExibicao(produtoSelecionado.getValorCusto()
                                         .multiply(produtoSelecionado.getEstoque()
-                                        .subtract(produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()), 2, RoundingMode.HALF_EVEN)
-                                        ).setScale(0, RoundingMode.DOWN)));
-                    } else{
+                                                .subtract(produtoSelecionado.getVendas().divide(new BigDecimal(produtoSelecionado.getProduto().getDoses()), 2, RoundingMode.HALF_EVEN)
+                                                ).setScale(0, RoundingMode.DOWN)));
+                    } else {
                         valueObject = FormatUtils
-                            .formataDinheiroExibicao(produtoSelecionado.getValorCusto().multiply(produtoSelecionado.getEstoque()
-                                    .subtract(produtoSelecionado.getVendas())));
+                                .formataDinheiroExibicao(produtoSelecionado.getValorCusto().multiply(produtoSelecionado.getEstoque()
+                                        .subtract(produtoSelecionado.getVendas())));
                     }
-                    
-                    
+
                 }
-                
+
                 break;
             default:
                 System.err.println("Índice inválido para propriedade do bean ProdutoEvento.class");
@@ -215,8 +245,8 @@ public class ProdutoEventoTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        
-        switch(columnIndex){
+
+        switch (columnIndex) {
             case 0:
                 return false;
             case 1:
